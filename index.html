@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Perú en tres censos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Comparador de los Censos Nacionales 2007, 2017 y 2025 del INEI por región, provincia y distrito.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+/* Publicación estadística sobria: columnas a 1200px, reglas finas, una serif para títulos y cifras, sans para datos. */
+:root{
+  --bg:#ffffff; --panel:#F5F6F8; --ink:#1B1F24; --ink2:#3A424D; --muted:#5B6470;
+  --rule:#D9DDE3; --rule2:#ECEEF1; --line:#A9B0BA;
+  --accent:#1F3A5F; --accent-ink:#ffffff; --down:#8C2D1F;
+  --warn-bg:#FBF5E6; --warn-bd:#B8892B; --warn-ink:#7A5A12;
+  --m-n2:#8C2D1F; --m-n1:#D9A08F; --m-p1:#B7C7DB; --m-p2:#5C7FA8; --m-p3:#1F3A5F; --m-na:#E4E6EA; --m-stroke:#ffffff; --m-dep:#1B1F24;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"Public Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#12161B; --panel:#1A2028; --ink:#E7EAEE; --ink2:#C5CBD3; --muted:#98A2AE;
+  --rule:#2C343E; --rule2:#222932; --line:#4A5562;
+  --accent:#8FB3DE; --accent-ink:#0E1520; --down:#E0907E;
+  --warn-bg:#2A2416; --warn-bd:#C9A24B; --warn-ink:#E3C27A;
+  --m-n2:#C0573F; --m-n1:#8A5A4E; --m-p1:#3E5570; --m-p2:#5E86B5; --m-p3:#A9C6EA; --m-na:#2A313A; --m-stroke:#12161B; --m-dep:#E7EAEE;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#12161B; --panel:#1A2028; --ink:#E7EAEE; --ink2:#C5CBD3; --muted:#98A2AE;
+  --rule:#2C343E; --rule2:#222932; --line:#4A5562;
+  --accent:#8FB3DE; --accent-ink:#0E1520; --down:#E0907E;
+  --warn-bg:#2A2416; --warn-bd:#C9A24B; --warn-ink:#E3C27A;
+  --m-n2:#C0573F; --m-n1:#8A5A4E; --m-p1:#3E5570; --m-p2:#5E86B5; --m-p3:#A9C6EA; --m-na:#2A313A; --m-stroke:#12161B; --m-dep:#E7EAEE;
+  color-scheme:dark }
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+a{color:var(--accent)} a:hover{text-decoration-thickness:2px}
+button,input,select{font-family:inherit;font-size:14px;color:var(--ink)}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (min-width:720px){.wrap{padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px))}}
+.serif{font-family:var(--serif)}
+.lab{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.muted{color:var(--muted)} .small{font-size:12px;line-height:1.45}
+h1,h2,h3{text-wrap:balance}
+
+/* cabecera */
+.top{border-top:4px solid var(--accent);border-bottom:1px solid var(--rule)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding-block:16px}
+.brand{display:flex;flex-direction:column;gap:1px;text-decoration:none;color:var(--ink)}
+.brand b{font-family:var(--serif);font-size:22px;font-weight:700}
+.brand span{font-size:13px;color:var(--muted)}
+.nav{display:flex;flex-wrap:wrap;gap:4px 24px}
+.nav button{background:none;border:0;border-bottom:2px solid transparent;padding:6px 0;color:var(--accent);font-size:14px}
+.nav button[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
+
+/* intro y controles */
+.intro{padding-block:36px 24px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:10px}
+.intro h1{margin:0;font-family:var(--serif);font-size:clamp(30px,4.4vw,44px);line-height:1.1;font-weight:600}
+.intro p{margin:0;font-size:17px;color:var(--ink2);max-width:62ch}
+.controls{padding-block:20px 22px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:18px}
+.tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;color:var(--muted);margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:18px 24px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.grow{flex:1 1 260px}
+select,input[type=search]{border:1px solid var(--line);background:var(--bg);padding:9px 11px;border-radius:0;min-width:0;width:100%;box-sizing:border-box}
+.seg{display:flex;border:1px solid var(--line);flex-wrap:wrap}
+.seg button{border:0;background:var(--bg);padding:9px 13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.seg button:disabled{color:var(--line);cursor:not-allowed}
+
+/* resumen */
+.summary{padding-block:28px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:28px 40px;align-items:flex-start}
+.summary .main{flex:2 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.summary h2{margin:0;font-family:var(--serif);font-size:26px;line-height:1.2;font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-top:1px solid var(--rule)}
+.tile.ch{background:var(--panel);border-top-color:var(--accent)}
+.tile .big{font-family:var(--serif);font-size:clamp(30px,3.6vw,42px);line-height:1;font-weight:600}
+.tile .sub{font-size:14px;color:var(--ink2)}
+.tile.old .big{color:var(--muted)}
+.lead{margin:0;font-size:15px;line-height:1.6;color:var(--ink2);max-width:72ch}
+.cmpbox{flex:1 1 300px;min-width:0;border:1px solid var(--rule);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.pairs{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.pairs li{display:grid;grid-template-columns:132px minmax(0,1fr);gap:10px;font-size:13px;line-height:1.45;padding:6px 8px;border-left:2px solid transparent}
+.pairs li.on{background:var(--panel);border-left-color:var(--accent)}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;font-size:12px;font-weight:700;border:1px solid currentColor;white-space:nowrap;box-sizing:border-box}
+.b-eq{color:var(--accent)} .b-ap{color:var(--muted)} .b-no{color:var(--down)}
+
+/* mapa y rankings */
+.grid2{padding-block:28px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:36px 48px;align-items:flex-start}
+.mapfig{flex:1 1 440px;min-width:0;margin:0;display:flex;flex-direction:column;gap:12px;position:relative}
+.mapfig figcaption{display:flex;flex-direction:column;gap:2px}
+.h3{font-family:var(--serif);font-size:20px;font-weight:600;margin:0}
+#map{width:100%;height:auto;max-height:640px;display:block}
+#map path.u{stroke:var(--m-stroke);stroke-width:.5;vector-effect:non-scaling-stroke;cursor:pointer}
+#map path.u:hover{stroke:var(--ink);stroke-width:1.5}
+#map path.dep{fill:none;stroke:var(--m-dep);stroke-opacity:.5;stroke-width:.9;vector-effect:non-scaling-stroke;pointer-events:none}
+.c-n2{fill:var(--m-n2)} .c-n1{fill:var(--m-n1)} .c-p1{fill:var(--m-p1)} .c-p2{fill:var(--m-p2)} .c-p3{fill:var(--m-p3)} .c-na{fill:var(--m-na)}
+.legend{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) auto;gap:2px 6px;font-size:12px;line-height:1.35;color:var(--muted)}
+.legend .sw{height:10px}
+.legend .na{display:flex;gap:6px;align-items:center;grid-row:span 2;align-self:end;padding-left:8px}
+.legend .na i{width:12px;height:10px;display:inline-block}
+.tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--line);padding:8px 10px;font-size:13px;line-height:1.4;max-width:240px;box-shadow:0 2px 8px rgba(0,0,0,.12);z-index:5}
+.ranks{flex:1 1 500px;min-width:0;display:flex;flex-direction:column;gap:28px}
+.rk-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--ink);padding-bottom:8px}
+.rk{display:grid;grid-template-columns:minmax(0,210px) minmax(60px,1fr) 84px;gap:14px;align-items:center;padding:6px 0;border-bottom:1px solid var(--rule2)}
+.rk .nm{background:none;border:0;padding:0;text-align:left;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block}
+.rk .nm:hover{color:var(--accent);text-decoration:underline}
+.rk .meta{font-size:12px;color:var(--muted);line-height:1.4}
+.rk .d{font-weight:700;text-align:right;font-size:15px}
+.db{position:relative;height:14px}
+.db .base{position:absolute;top:6px;left:0;right:0;height:1px;background:var(--rule)}
+.db .seg2{position:absolute;top:5px;height:3px}
+.db .dot{position:absolute;top:2px;width:9px;height:9px;border-radius:50%;margin-left:-4.5px;box-sizing:border-box}
+.db .a{border:1.5px solid var(--muted);background:var(--bg)}
+.db .b{background:var(--ink)}
+.up{color:var(--accent)} .dn{color:var(--down)} .nu{color:var(--muted)}
+.bg-up{background:var(--accent)} .bg-dn{background:var(--down)} .bg-nu{background:var(--muted)}
+.note{font-size:12px;color:var(--muted);line-height:1.45;margin:0}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;font-size:14px}
+
+/* tabla completa */
+.full{padding-block:24px;border-bottom:1px solid var(--rule)}
+.tablebox{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+table.t th{font-size:12px;letter-spacing:.06em;color:var(--muted);text-align:right;padding:8px;border-bottom:1px solid var(--ink);white-space:nowrap}
+table.t th:first-child,table.t td:first-child{text-align:left;padding-left:0}
+table.t th button{background:none;border:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;cursor:pointer}
+table.t th button[aria-sort]{color:var(--ink)}
+table.t td{padding:9px 8px;border-bottom:1px solid var(--rule2);text-align:right;vertical-align:top}
+.pc{font-size:15px} .ct{font-size:12px;color:var(--muted)}
+.alert{font-size:12px;color:var(--warn-ink);margin-top:3px;font-weight:400}
+
+/* cita */
+.cite{margin-block:24px;background:var(--panel);padding:16px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.cite p{margin:0;font-size:14px;line-height:1.55}
+.btn{border:1px solid var(--line);background:var(--bg);padding:9px 16px}
+
+/* ficha */
+.fhead{padding-block:28px 24px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:16px}
+.crumbs{font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.crumbs button{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline}
+.fhead h1{margin:0;font-family:var(--serif);font-size:clamp(30px,4.4vw,44px);line-height:1.1;font-weight:600}
+.callout{margin-top:24px;border-left:3px solid var(--down);background:var(--panel);padding:16px 20px;display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.callout.up{border-left-color:var(--accent)}
+.callout .big{font-family:var(--serif);font-size:38px;line-height:1;font-weight:700}
+.callout div.txt{flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.warnbox{margin-top:20px;border:1px solid var(--warn-bd);border-left-width:4px;background:var(--warn-bg);padding:14px 18px;font-size:14px;line-height:1.55}
+.warnbox b{color:var(--warn-ink)}
+.cat{margin-top:28px}
+.cat h2{margin:0 0 6px;font-family:var(--serif);font-size:21px;font-weight:600}
+table.f td:first-child{min-width:240px}
+.legendline{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--muted);align-items:center;margin-top:20px}
+.legendline span{display:flex;gap:6px;align-items:center}
+
+/* búsqueda */
+.search{position:relative}
+.results{position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--line);border-top:0;max-height:320px;overflow:auto;margin:0;padding:0;list-style:none}
+.results li button{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 11px;border-bottom:1px solid var(--rule2)}
+.results li button:hover,.results li button.act{background:var(--panel)}
+.results small{color:var(--muted)}
+
+/* metodología */
+.prose{padding-block:32px 8px;max-width:760px}
+.prose h1{font-family:var(--serif);font-size:clamp(28px,4vw,40px);font-weight:600;margin:0 0 12px}
+.prose h2{font-family:var(--serif);font-size:21px;font-weight:600;margin:28px 0 8px}
+.prose p,.prose li{color:var(--ink2);line-height:1.65}
+.prose ul{padding-left:20px}
+
+footer{border-top:1px solid var(--rule);margin-top:40px}
+footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);line-height:1.5}
+.loading{padding-block:80px;text-align:center;color:var(--muted)}
+@media (max-width:560px){ .rk{grid-template-columns:minmax(0,1fr) 76px} .rk .db{display:none} .legend{grid-template-columns:repeat(5,minmax(0,1fr))} .legend .na{grid-column:1/-1;grid-row:auto;padding-left:0} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#" id="home"><b>Perú en tres censos</b><span>Comparador de los Censos Nacionales 2007, 2017 y 2025</span></a>
+    <nav class="nav" aria-label="Secciones">
+      <button data-view="comparador" aria-current="page">Comparador</button>
+      <button data-view="ficha">Ficha por territorio</button>
+      <button data-view="metodo">Metodología</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="loading" class="wrap loading">Cargando los datos de los tres censos…</div>
+
+  <!-- COMPARADOR -->
+  <div id="v-comparador" hidden>
+    <section class="wrap intro">
+      <h1>¿Dónde cambió más el Perú?</h1>
+      <p>41 indicadores de los Censos Nacionales 2007, 2017 y 2025, por región, provincia y distrito. Cada cifra indica si se puede comparar entre censos. Los territorios corresponden a la división de 2025 y se cruzan por ubigeo.</p>
+    </section>
+
+    <section class="wrap controls" aria-label="Opciones">
+      <div class="tabs" role="tablist" aria-label="Tema" id="cats"></div>
+      <div class="row">
+        <div class="field grow"><label class="lab" for="ind">Indicador</label><select id="ind"></select></div>
+        <div class="field"><span class="lab" id="lab-per">Periodo</span><div class="seg" role="group" aria-labelledby="lab-per" id="per"></div></div>
+        <div class="field"><span class="lab" id="lab-niv">Nivel</span><div class="seg" role="group" aria-labelledby="lab-niv" id="niv"></div></div>
+      </div>
+      <div class="row">
+        <div class="field grow"><label class="lab" for="sc-r">Ámbito: región</label><select id="sc-r"></select></div>
+        <div class="field grow"><label class="lab" for="sc-p">Ámbito: provincia</label><select id="sc-p"></select></div>
+        <div class="field grow search"><label class="lab" for="q1">Buscar un territorio</label><input id="q1" type="search" placeholder="Región, provincia o distrito" autocomplete="off"><ul class="results" id="q1r" hidden></ul></div>
+      </div>
+    </section>
+
+    <section class="wrap summary" aria-live="polite">
+      <div class="main">
+        <div><h2 id="s-title"></h2><div class="muted" id="s-unit" style="font-size:14px"></div></div>
+        <div class="tiles" id="s-tiles"></div>
+        <p class="lead" id="s-lead"></p>
+      </div>
+      <aside class="cmpbox" aria-labelledby="cmp-t">
+        <div class="lab" id="cmp-t">Comparabilidad</div>
+        <ul class="pairs" id="cmp-pairs"></ul>
+        <p class="note" id="cmp-def"></p>
+      </aside>
+    </section>
+
+    <section class="wrap grid2">
+      <figure class="mapfig">
+        <figcaption><span class="h3" id="m-title"></span><span class="muted small" id="m-sub"></span></figcaption>
+        <svg id="map" role="img" aria-labelledby="m-title"></svg>
+        <div class="legend" id="m-legend"></div>
+        <p class="note" id="m-note"></p>
+        <div class="tip" id="tip" hidden></div>
+      </figure>
+      <div class="ranks">
+        <div><div class="rk-head"><h3 class="h3" id="r1-t"></h3><span class="small muted" id="r-key"></span></div><div id="r1"></div><p class="note" id="r1-n"></p></div>
+        <div><div class="rk-head"><h3 class="h3" id="r2-t"></h3></div><div id="r2"></div><p class="note" id="r2-n"></p></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><span class="note" id="r-scale"></span><button class="linkbtn" id="showall" aria-expanded="false"></button></div>
+      </div>
+    </section>
+
+    <section class="wrap full" id="fullsec" hidden>
+      <h3 class="h3" id="full-t" style="margin-bottom:10px"></h3>
+      <div class="tablebox"><table class="t" id="full"></table></div>
+      <div style="margin-top:12px"><button class="btn" id="more" hidden>Mostrar más</button></div>
+    </section>
+
+    <div class="wrap"><div class="cite" id="cite" hidden><div style="display:flex;flex-direction:column;gap:4px;flex:1 1 560px;min-width:0"><span class="lab">Para citar</span><p id="cite-t"></p></div><button class="btn" id="cite-b">Copiar</button></div></div>
+  </div>
+
+  <!-- FICHA -->
+  <div id="v-ficha" hidden>
+    <section class="wrap fhead">
+      <div class="row" style="justify-content:space-between">
+        <nav class="crumbs" aria-label="Ubicación" id="f-crumbs"></nav>
+        <div class="field search" style="flex:0 1 360px"><label class="lab" for="q2">Ir a otro territorio</label><input id="q2" type="search" placeholder="Región, provincia o distrito" autocomplete="off"><ul class="results" id="q2r" hidden></ul></div>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="lab" id="f-kind"></span>
+          <h1 id="f-name"></h1>
+          <span style="font-size:15px;color:var(--ink2)" id="f-facts"></span>
+        </div>
+        <div class="field"><span class="lab" id="lab-per2">Cambio mostrado</span><div class="seg" role="group" aria-labelledby="lab-per2" id="per2"></div></div>
+      </div>
+    </section>
+    <section class="wrap" id="f-body"></section>
+  </div>
+
+  <!-- METODOLOGÍA -->
+  <div id="v-metodo" hidden>
+    <article class="wrap prose">
+      <h1>Metodología</h1>
+      <p>Este comparador reúne indicadores de los Censos Nacionales de Población y Vivienda del INEI de 2007, 2017 y 2025. Las cifras se calcularon a partir de los microdatos de 2007 y 2017 y de las tabulaciones distritales del Censo 2025.</p>
+      <h2>Qué se compara</h2>
+      <ul>
+        <li>Solo indicadores que existen en al menos dos censos. Para cada par de censos se indica si la pregunta es la misma (=), parecida (≈) o distinta. Si no es comparable, el valor se muestra pero el cambio no se calcula.</li>
+        <li>Los cambios de porcentajes están en puntos porcentuales (pp). Para población, hogares y viviendas se muestra el crecimiento en porcentaje y el cambio en número.</li>
+        <li>Debajo de cada porcentaje aparece el número de viviendas, hogares o personas que cumple la condición. Un porcentaje puede bajar aunque el número suba, si el total creció más rápido.</li>
+      </ul>
+      <h2>Universos</h2>
+      <ul>
+        <li>Población censada: 27,412,157 (2007), 29,381,884 (2017) y 32,706,028 (2025). No incluye la estimación de población omitida. La población total oficial, con omisión, fue 28,220,764, 31,237,385 y 34,157,732; por eso las cifras de población de esta página son menores que las del tablero oficial del INEI.</li>
+        <li>Viviendas: particulares con ocupantes presentes (6,400,131; 7,698,900 y 10,167,523).</li>
+        <li>Hogares: 6,754,074; 8,252,284 y 10,570,171.</li>
+      </ul>
+      <h2>Territorios</h2>
+      <ul>
+        <li>Todo se muestra con la división territorial de 2025: 25 regiones, 196 provincias y 1,893 distritos. Lo que no existía en un censo antiguo queda sin dato; nada se suma ni se reparte.</li>
+        <li>Los distritos se cruzan solo por ubigeo, nunca por nombre. Entre 2007 y 2025 hay 63 distritos nuevos, 3 ubigeos que ya no existen, 13 cambios de nombre con el mismo ubigeo y 26 provincias cuyo conjunto de distritos cambió. En esas provincias el cambio por distrito no se calcula y se recomienda comparar la provincia completa.</li>
+        <li>Putumayo (Loreto) se creó en 2014 a partir de Maynas: no tiene dato en 2007, y el dato 2007 de Maynas incluye su territorio.</li>
+        <li>Lima Metropolitana y Callao se presentan juntas como una región; el resto del departamento de Lima es Lima Provincias.</li>
+      </ul>
+      <h2>Lo que no se compara</h2>
+      <ul>
+        <li>Discapacidad, autoidentificación étnica y tenencia de la vivienda: las preguntas cambiaron entre censos.</li>
+        <li>Internet entre 2017 y 2025: en 2017 no se separó internet fijo y móvil.</li>
+        <li>Castellano como lengua materna frente a 2025: en 2025 se puede declarar más de una lengua materna.</li>
+        <li>Empleo: el Censo 2025 no lo preguntó. Para 2007 y 2017 se usa el conteo directo; en 2017 el INEI publicó una PEA mayor, estimada con modelos.</li>
+      </ul>
+      <h2>Mapa</h2>
+      <p>El mapa usa límites provinciales y distritales anteriores a 2025, de fuente pública. Por eso Putumayo aparece dentro de Maynas y unos 70 distritos creados recientemente no tienen polígono propio: su territorio se ve dentro del distrito del que salieron. Es una aproximación visual; las cifras de las tablas usan siempre los territorios de 2025.</p>
+      <h2>Fuente</h2>
+      <p>INEI – Censos Nacionales 2007: XI de Población y VI de Vivienda; 2017: XII de Población, VII de Vivienda y III de Comunidades Indígenas; 2025: XIII de Población, VIII de Vivienda y IV de Comunidades Indígenas. Elaboración propia.</p>
+    </article>
+  </div>
+</main>
+
+<footer><div class="wrap"><span>Fuente: INEI – Censos Nacionales 2007, 2017 y 2025. Elaboración propia.</span><span>Población y viviendas censadas.</span></div></footer>
+
+<script>
+(function(){
+"use strict";
+var D, G, M = {}, BYCAT = {};
+var YRS = [2007, 2017, 2025];
+var PAIRS = ["2007-2017", "2017-2025", "2007-2025"];
+var LEV = {R: {pl: "regiones", sg: "región", art: "las"}, P: {pl: "provincias", sg: "provincia", art: "las"}, D: {pl: "distritos", sg: "distrito", art: "los"}};
+var S = {cat: "Infraestructura y servicios básicos", ind: "SB3RP", pair: "2017-2025", lev: "P", sr: "", sp: "", view: "comparador", terr: null, all: false, sort: null, shown: 50};
+var $ = function(id){ return document.getElementById(id); };
+function el(tag, attrs, kids){ var e = document.createElement(tag); if (attrs) for (var k in attrs){ if (k === "text") e.textContent = attrs[k]; else if (k === "cls") e.className = attrs[k]; else if (k.slice(0,2) === "on") e.addEventListener(k.slice(2), attrs[k]); else e.setAttribute(k, attrs[k]); } (kids || []).forEach(function(c){ if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); }); return e; }
+function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); }
+function norm(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+var nf = new Intl.NumberFormat("en-US");
+function fN(x){ return x == null ? "" : nf.format(x); }
+function fP(x){ return x == null ? "—" : x.toFixed(1) + "%"; }
+function sgn(x){ return x > 0 ? "+" : x < 0 ? "−" : ""; }
+function fD(x, unit){ return x == null ? "—" : sgn(x) + Math.abs(x).toFixed(1) + (unit || " pp"); }
+function fDN(x){ return x == null ? "" : sgn(x) + nf.format(Math.abs(x)); }
+function rname(n){ return n === "Lima*" ? "Lima Metropolitana y Callao" : n; }
+function pyears(p){ return p.split("-").map(Number); }
+function ix(y){ return YRS.indexOf(y); }
+
+/* ---------- unidades territoriales ---------- */
+var U = [];   // {lev, k, name, parent, region, u, prov}
+var provByU = {}, regIdx = {};
+function buildUnits(){
+  D.R.names.forEach(function(n, k){ regIdx[n] = k; if (k > 0) U.push({lev: "R", k: k, name: rname(n), region: n, parent: "Perú", u: n}); });
+  D.P.u.forEach(function(u, k){ provByU[u] = k; U.push({lev: "P", k: k, name: D.P.n[k], region: D.P.r[k], parent: rname(D.P.r[k]), u: u}); });
+  D.D.u.forEach(function(u, k){ var pk = provByU[u.slice(0,4)]; U.push({lev: "D", k: k, name: D.D.n[k], region: D.D.r[k], prov: u.slice(0,4), parent: D.P.n[pk] + ", " + rname(D.D.r[k]), u: u}); });
+  U.forEach(function(x){ x.q = norm(x.name); });
+}
+function blk(lev){ return lev === "R" ? D.R : lev === "P" ? D.P : D.D; }
+function vals(lev, k, id){ var b = blk(lev); return b.v[id][k]; }
+function cnts(lev, k, id){ return (lev === "R" ? D.R.n : blk(lev).c)[id][k]; }
+function peruUnit(){ return {lev: "R", k: 0, name: "Perú", region: null, parent: "", u: "PE"}; }
+
+/* cambio de un territorio en un par */
+function change(m, lev, k, pair){
+  var y = pyears(pair), v = vals(lev, k, m.id), c = cnts(lev, k, m.id), a = v[ix(y[0])], b = v[ix(y[1])];
+  var out = {a: a, b: b, na: c[ix(y[0])], nb: c[ix(y[1])], d: null, dn: null, why: ""};
+  if (!m.cmp[pair]) { out.why = m.years.indexOf(y[0]) < 0 || m.years.indexOf(y[1]) < 0 ? "No existe en " + (m.years.indexOf(y[0]) < 0 ? y[0] : y[1]) : "Definición distinta"; return out; }
+  if (lev === "D" && !D.D.comp[pair][k]) { out.why = "Límites cambiaron"; return out; }
+  if (a == null || b == null) { out.why = "Sin dato en " + (a == null ? y[0] : y[1]); return out; }
+  if (m.unit === "pct") { out.d = Math.round((b - a) * 10) / 10; if (out.na != null && out.nb != null) out.dn = out.nb - out.na; }
+  else { out.dn = b - a; out.d = a > 0 ? Math.round((b / a - 1) * 1000) / 10 : null; }
+  return out;
+}
+function score(m, d){ return d == null ? null : d * (m.dir || 1); }
+function cls(m, d){ if (d == null || d === 0) return "nu"; var s = score(m, d); return s > 0 ? "up" : "dn"; }
+
+/* ---------- controles ---------- */
+function setupControls(){
+  D.meta.forEach(function(m){ M[m.id] = m; (BYCAT[m.cat] = BYCAT[m.cat] || []).push(m); });
+  var cats = $("cats");
+  D.cats.forEach(function(c){ cats.appendChild(el("button", {role: "tab", "aria-selected": c === S.cat ? "true" : "false", text: c, onclick: function(){ S.cat = c; S.ind = BYCAT[c][0].id; fixPair(); S.all = false; renderAll(); }})); });
+  $("ind").addEventListener("change", function(e){ S.ind = e.target.value; fixPair(); renderAll(); });
+  $("sc-r").addEventListener("change", function(e){ S.sr = e.target.value; S.sp = ""; renderAll(); });
+  $("sc-p").addEventListener("change", function(e){ S.sp = e.target.value; renderAll(); });
+  setupSearch("q1", "q1r"); setupSearch("q2", "q2r");
+  document.querySelectorAll(".nav button").forEach(function(b){ b.addEventListener("click", function(){ go(b.getAttribute("data-view")); }); });
+  $("home").addEventListener("click", function(e){ e.preventDefault(); go("comparador"); });
+  $("showall").addEventListener("click", function(){ S.all = !S.all; S.shown = 50; renderFull(); });
+  $("more").addEventListener("click", function(){ S.shown += 100; renderFull(); });
+  $("cite-b").addEventListener("click", function(){ copy($("cite-t").textContent, $("cite-b")); });
+}
+function fixPair(){ var m = M[S.ind]; if (!m.cmp[S.pair]) { var ok = PAIRS.filter(function(p){ return m.cmp[p]; }); if (ok.length) S.pair = ok.indexOf("2017-2025") >= 0 ? "2017-2025" : ok[0]; } }
+function segButtons(box, items, cur, on){ clear(box); items.forEach(function(it){ box.appendChild(el("button", {"aria-pressed": it.v === cur ? "true" : "false", text: it.t, onclick: function(){ on(it.v); }})); if (it.dis) box.lastChild.disabled = true; }); }
+function renderControls(){
+  document.querySelectorAll("#cats button").forEach(function(b){ b.setAttribute("aria-selected", b.textContent === S.cat ? "true" : "false"); });
+  var s = $("ind"); clear(s); BYCAT[S.cat].forEach(function(m){ var o = el("option", {value: m.id, text: m.label}); if (m.id === S.ind) o.selected = true; s.appendChild(o); });
+  var m = M[S.ind];
+  segButtons($("per"), PAIRS.map(function(p){ return {v: p, t: p.replace("-", "–") + (m.cmp[p] ? "" : " (n. c.)")}; }), S.pair, function(v){ S.pair = v; renderAll(); });
+  segButtons($("niv"), [{v: "R", t: "Regiones"}, {v: "P", t: "Provincias"}, {v: "D", t: "Distritos"}], S.lev, function(v){ S.lev = v; S.all = false; if (v === "R") { S.sr = ""; S.sp = ""; } if (v !== "D") S.sp = ""; renderAll(); });
+  var r = $("sc-r"); clear(r); r.appendChild(el("option", {value: "", text: "Todo el Perú"}));
+  D.R.names.slice(1).forEach(function(n){ var o = el("option", {value: n, text: rname(n)}); if (n === S.sr) o.selected = true; r.appendChild(o); });
+  r.disabled = S.lev === "R";
+  var p = $("sc-p"); clear(p); p.appendChild(el("option", {value: "", text: S.sr ? "Todas las provincias" : "Elige primero una región"}));
+  if (S.sr) D.P.u.forEach(function(u, k){ if (D.P.r[k] === S.sr) { var o = el("option", {value: u, text: D.P.n[k]}); if (u === S.sp) o.selected = true; p.appendChild(o); } });
+  p.disabled = S.lev !== "D" || !S.sr;
+}
+
+/* territorios del nivel dentro del ámbito, y el territorio que resume el ámbito */
+function scopeUnits(){ return U.filter(function(x){ if (x.lev !== S.lev) return false; if (S.sr && x.region !== S.sr) return false; if (S.sp && x.prov !== S.sp) return false; return true; }); }
+function scopeUnit(){
+  if (S.sp) { var k = provByU[S.sp]; return {lev: "P", k: k, name: "provincia de " + D.P.n[k], short: D.P.n[k]}; }
+  if (S.sr) return {lev: "R", k: regIdx[S.sr], name: rname(S.sr), short: rname(S.sr)};
+  return {lev: "R", k: 0, name: "el Perú", short: "Perú"};
+}
+function scopeLabel(){ return S.sp ? "de la provincia de " + D.P.n[provByU[S.sp]] : S.sr ? "de " + rname(S.sr) : "del país"; }
+
+/* ---------- resumen ---------- */
+function renderSummary(){
+  var m = M[S.ind], su = scopeUnit(), v = vals(su.lev, su.k, m.id), c = cnts(su.lev, su.k, m.id);
+  $("s-title").textContent = m.label;
+  $("s-unit").textContent = (m.unit === "pct" ? "Porcentaje de " + m.den + " y, debajo, número de " + m.cu : "Número de " + m.cu) + ". " + (su.short === "Perú" ? "Perú" : su.short) + ".";
+  var t = $("s-tiles"); clear(t);
+  m.years.forEach(function(y){
+    var i = ix(y);
+    t.appendChild(el("div", {cls: "tile" + (y === 2007 ? " old" : "")}, [
+      el("span", {cls: "lab", text: (su.short === "Perú" ? "Perú " : "") + y}),
+      el("span", {cls: "big", text: m.unit === "pct" ? fP(v[i]) : fN(v[i])}),
+      el("span", {cls: "sub", text: m.unit === "pct" ? (c[i] != null ? fN(c[i]) + " " + m.cu : "") : m.cu})
+    ]));
+  });
+  var ch = change(m, su.lev, su.k, S.pair), pl = S.pair.replace("-", "–");
+  var big = ch.d == null ? "No comparable" : (m.unit === "pct" ? fD(ch.d) : fD(ch.d, "%"));
+  t.appendChild(el("div", {cls: "tile ch"}, [
+    el("span", {cls: "lab", text: "Cambio " + pl}),
+    el("span", {cls: "big " + cls(m, ch.d), style: ch.d == null ? "font-size:22px" : "", text: big}),
+    el("span", {cls: "sub", text: ch.d == null ? ch.why : (ch.dn != null ? fDN(ch.dn) + " " + m.cu : "")})
+  ]));
+  // texto
+  var list = rankData(), y = pyears(S.pair), lead = "";
+  if (ch.d != null) {
+    lead = "Entre " + y[0] + " y " + y[1] + ", " + m.long + " en " + su.name + (m.unit === "pct" ? " pasó de " + fP(ch.a) + " a " + fP(ch.b) + " (" + fD(ch.d) + ")." : " pasó de " + fN(ch.a) + " a " + fN(ch.b) + " (" + fD(ch.d, "%") + ").");
+    if (m.unit === "pct" && ch.dn != null) lead += " En número, " + (ch.dn >= 0 ? "son " + fN(ch.dn) + " " + m.cu + " más" : "son " + fN(-ch.dn) + " " + m.cu + " menos") + ".";
+    var up = list.ok.filter(function(r){ return r.s > 0; }).length, dn = list.ok.filter(function(r){ return r.s < 0; }).length;
+    var w = m.dir ? ["mejoraron", "empeoraron"] : ["subieron", "bajaron"];
+    lead += " De " + LEV[S.lev].art + " " + list.all.length + " " + LEV[S.lev].pl + " " + scopeLabel() + ", " + up + " " + w[0] + " y " + dn + " " + w[1] + (list.out ? "; " + list.out + " no se comparan" : "") + ".";
+  } else lead = ch.why === "Definición distinta" ? "La pregunta cambió entre " + y[0] + " y " + y[1] + ": se muestran los valores, pero no el cambio. Ver la nota de comparabilidad." : ch.why + ".";
+  $("s-lead").textContent = lead;
+  // comparabilidad
+  var ul = $("cmp-pairs"); clear(ul);
+  PAIRS.forEach(function(p){
+    var b = m.cmp[p] ? (m.notes[p].indexOf("Similar") === 0 ? ["≈", "b-ap"] : ["=", "b-eq"]) : ["No comparable", "b-no"];
+    var txt = m.notes[p] || (m.cmp[p] ? "Misma definición" : "");
+    ul.appendChild(el("li", {cls: p === S.pair ? "on" : ""}, [el("span", {}, [el("b", {text: p.replace("-", "–") + " "}), el("span", {cls: "badge " + b[1], text: b[0]})]), el("span", {text: txt})]));
+  });
+  $("cmp-def").textContent = m.def_ + (m.den ? ". Universo: " + m.den + "." : ".") + (m.extra ? " " + m.extra : "");
+}
+
+/* ---------- ranking ---------- */
+function rankData(){
+  var m = M[S.ind], all = scopeUnits(), ok = [], out = 0;
+  all.forEach(function(x){ var ch = change(m, x.lev, x.k, S.pair); if (ch.d == null) { out++; return; } ok.push({x: x, ch: ch, s: score(m, ch.d)}); });
+  ok.sort(function(a, b){ return b.s - a.s; });
+  return {all: all, ok: ok, out: out};
+}
+function renderRanks(){
+  var m = M[S.ind], R = rankData(), pos = R.ok.filter(function(r){ return r.s > 0; }), neg = R.ok.filter(function(r){ return r.s < 0; }).reverse();
+  var w = m.dir ? ["Mayores mejoras", "Mayores retrocesos"] : ["Mayores aumentos", "Mayores disminuciones"];
+  $("r1-t").textContent = w[0]; $("r2-t").textContent = w[1];
+  var shown = pos.slice(0, 8).concat(neg.slice(0, 8)), mx = 0;
+  shown.forEach(function(r){ mx = Math.max(mx, r.ch.a || 0, r.ch.b || 0); });
+  var top = m.unit === "pct" ? (mx > 50 ? 100 : niceMax(mx)) : niceMax(mx);
+  $("r-scale").textContent = shown.length ? "Escala de 0 a " + (m.unit === "pct" ? top + "%" : fN(top)) + "." : "";
+  $("r-key").textContent = "";
+  $("r-key").appendChild(el("span", {style: "display:inline-flex;gap:14px;align-items:center"}, [el("span", {style: "display:inline-flex;gap:6px;align-items:center"}, [el("i", {style: "width:9px;height:9px;border:1.5px solid var(--muted);border-radius:50%;display:inline-block;box-sizing:border-box"}), String(pyears(S.pair)[0])]), el("span", {style: "display:inline-flex;gap:6px;align-items:center"}, [el("i", {style: "width:9px;height:9px;background:var(--ink);border-radius:50%;display:inline-block"}), String(pyears(S.pair)[1])])]));
+  fillRank($("r1"), pos.slice(0, 8), m, top); fillRank($("r2"), neg.slice(0, 8), m, top);
+  $("r1-n").textContent = pos.length ? countNote(pos.slice(0, 8), m) : "Ningún territorio en este grupo.";
+  var n2 = neg.length ? countNote(neg.slice(0, 8), m) : "Ningún territorio en este grupo.";
+  if (R.out) n2 += (n2 ? " " : "") + R.out + " " + LEV[S.lev].pl + " no se comparan (sin dato, definición distinta o cambio de límites).";
+  $("r2-n").textContent = n2;
+  $("showall").textContent = S.all ? "Ocultar la tabla completa" : "Ver las " + R.all.length + " " + LEV[S.lev].pl + " en una tabla";
+  $("showall").setAttribute("aria-expanded", S.all ? "true" : "false");
+}
+function niceMax(x){ if (x <= 0) return 1; var p = Math.pow(10, Math.floor(Math.log10(x))), f = x / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
+function countNote(rows, m){
+  if (m.unit !== "pct") return "";
+  var n = rows.filter(function(r){ return r.ch.dn != null && r.ch.dn !== 0 && Math.sign(r.ch.dn) !== Math.sign(r.ch.d); }).length;
+  if (!n) return "";
+  return "En " + n + " de " + rows.length + ", el número de " + m.cu + " se movió en sentido contrario al porcentaje: el total de " + (m.den.indexOf("viviendas") === 0 ? "viviendas" : m.den.indexOf("hogares") === 0 ? "hogares" : "personas") + " cambió más rápido.";
+}
+function fillRank(box, rows, m, top){
+  clear(box);
+  rows.forEach(function(r){
+    var a = r.ch.a, b = r.ch.b, c = cls(m, r.ch.d);
+    var pa = Math.min(100, a / top * 100), pb = Math.min(100, b / top * 100);
+    var meta = m.unit === "pct" ? fP(a) + " → " + fP(b) + (r.ch.na != null ? " · " + fN(r.ch.na) + " → " + fN(r.ch.nb) + " " + m.cu : "") : fN(a) + " → " + fN(b) + " " + m.cu;
+    box.appendChild(el("div", {cls: "rk"}, [
+      el("div", {style: "min-width:0"}, [el("button", {cls: "nm", title: r.x.name, text: r.x.name, onclick: function(){ openFicha(r.x); }}), el("div", {cls: "meta", text: r.x.parent}), el("div", {cls: "meta", text: meta})]),
+      el("div", {cls: "db", "aria-hidden": "true"}, [el("div", {cls: "base"}), el("div", {cls: "seg2 bg-" + c, style: "left:" + Math.min(pa, pb) + "%;width:" + Math.abs(pb - pa) + "%"}), el("div", {cls: "dot a", style: "left:" + pa + "%"}), el("div", {cls: "dot b", style: "left:" + pb + "%"})]),
+      el("div", {cls: "d " + c, text: m.unit === "pct" ? fD(r.ch.d) : fD(r.ch.d, "%")})
+    ]));
+  });
+}
+
+/* ---------- tabla completa ---------- */
+function renderFull(){
+  var sec = $("fullsec"); sec.hidden = !S.all; $("showall").textContent = S.all ? "Ocultar la tabla completa" : $("showall").textContent;
+  if (!S.all) return;
+  var m = M[S.ind], y = pyears(S.pair), all = scopeUnits().map(function(x){ var ch = change(m, x.lev, x.k, S.pair); return {x: x, ch: ch, s: score(m, ch.d)}; });
+  var sort = S.sort || {k: "s", dir: -1};
+  var key = {name: function(r){ return norm(r.x.name); }, a: function(r){ return r.ch.a; }, b: function(r){ return r.ch.b; }, s: function(r){ return r.s; }, dn: function(r){ return r.ch.dn; }};
+  all.sort(function(p, q){ var A = key[sort.k](p), B = key[sort.k](q); if (A == null && B == null) return 0; if (A == null) return 1; if (B == null) return -1; return (A < B ? -1 : A > B ? 1 : 0) * sort.dir; });
+  $("full-t").textContent = m.label + ": " + all.length + " " + LEV[S.lev].pl + " " + scopeLabel() + ", " + S.pair.replace("-", "–");
+  var t = $("full"); clear(t);
+  var cols = [["name", LEV[S.lev].sg.toUpperCase()], ["a", String(y[0])], ["b", String(y[1])], ["s", "CAMBIO " + (m.unit === "pct" ? "(PP)" : "(%)")], ["dn", "CAMBIO EN NÚMERO"]];
+  var tr = el("tr");
+  cols.forEach(function(cdef){ var b = el("button", {text: cdef[1], onclick: function(){ S.sort = {k: cdef[0], dir: sort.k === cdef[0] ? -sort.dir : (cdef[0] === "name" ? 1 : -1)}; renderFull(); }}); if (sort.k === cdef[0]) b.setAttribute("aria-sort", sort.dir > 0 ? "ascending" : "descending"); tr.appendChild(el("th", {scope: "col"}, [b])); });
+  t.appendChild(el("thead", {}, [tr]));
+  var tb = el("tbody");
+  all.slice(0, S.shown).forEach(function(r){
+    var al = r.x.lev === "D" ? distAlert(r.x.k, S.pair) : "";
+    var cell = function(v, n){ return el("td", {}, [el("div", {cls: "pc", text: m.unit === "pct" ? fP(v) : fN(v)}), m.unit === "pct" && n != null ? el("div", {cls: "ct", text: fN(n)}) : null]); };
+    tb.appendChild(el("tr", {}, [
+      el("td", {}, [el("button", {cls: "linkbtn", style: "font-size:14px;text-align:left", text: r.x.name, onclick: function(){ openFicha(r.x); }}), el("div", {cls: "ct", text: r.x.parent}), al ? el("div", {cls: "alert", text: al}) : null]),
+      cell(r.ch.a, r.ch.na), cell(r.ch.b, r.ch.nb),
+      el("td", {cls: cls(m, r.ch.d), style: "font-weight:700"}, [r.ch.d == null ? el("span", {cls: "ct", text: r.ch.why}) : (m.unit === "pct" ? fD(r.ch.d) : fD(r.ch.d, "%"))]),
+      el("td", {cls: "ct", text: r.ch.dn == null ? "" : fDN(r.ch.dn)})
+    ]));
+  });
+  t.appendChild(tb);
+  $("more").hidden = all.length <= S.shown;
+}
+function distAlert(k, pair){
+  var y = pyears(pair), t = [];
+  if ((y[0] === 2007 && !D.D.e07[k]) || (y[0] === 2017 && !D.D.e17[k])) t.push("No existía en " + y[0]);
+  else if (!D.D.comp[pair][k]) t.push("Su provincia cambió de distritos entre " + y[0] + " y " + y[1] + ": comparar la provincia");
+  if (D.D.old[k]) t.push("Nombre anterior: " + D.D.old[k]);
+  return t.join(" · ");
+}
+
+/* ---------- mapa ---------- */
+var feats = null;
+function bboxOf(d){ var n = d.match(/-?[\d.]+/g), x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (var i = 0; i < n.length; i += 2){ var x = +n[i], y = +n[i+1]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } return [x0, y0, x1, y1]; }
+function prepGeo(){ feats = {P: {}, D: {}}; for (var u in G.prov) feats.P[u] = {d: G.prov[u], bb: bboxOf(G.prov[u])}; for (var w in G.dist) feats.D[w] = {d: G.dist[w], bb: bboxOf(G.dist[w])}; }
+function niceStep(x){ var c = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 15, 20, 25, 50, 100]; for (var i = 0; i < c.length; i++) if (c[i] >= x) return c[i]; return 100; }
+function renderMap(){
+  var m = M[S.ind], svg = $("map"), y = pyears(S.pair);
+  clear(svg);
+  var isPct = m.unit === "pct";
+  $("m-title").textContent = "Cambio por " + LEV[S.lev].sg + ", " + y[0] + "–" + y[1];
+  $("m-sub").textContent = (isPct ? "Puntos porcentuales" : "Crecimiento en %") + (m.dir ? ". Azul: mejora · rojo: empeora." : ". Azul: sube · rojo: baja.");
+  if (!m.cmp[S.pair]) { svg.setAttribute("viewBox", "0 0 400 60"); $("m-legend").textContent = ""; $("m-note").textContent = "Este indicador no se compara en el periodo elegido."; return; }
+  // valores por polígono
+  var paint = [];  // {key, d, x(unit)}
+  var units = scopeUnits(), byU = {};
+  units.forEach(function(x){ byU[x.u] = x; });
+  if (S.lev === "D") units.forEach(function(x){ var f = feats.D[x.u]; if (f) paint.push({f: f, x: x}); });
+  else if (S.lev === "P") units.forEach(function(x){ var f = feats.P[x.u]; if (f) paint.push({f: f, x: x}); });
+  else D.P.u.forEach(function(u, k){ var f = feats.P[u]; if (!f) return; var r = D.P.r[k]; paint.push({f: f, x: U.filter(function(z){ return z.lev === "R" && z.region === r; })[0]}); });
+  var sc = [];
+  paint.forEach(function(p){ p.ch = change(m, p.x.lev, p.x.k, S.pair); p.s = score(m, p.ch.d); if (p.s != null) sc.push(Math.abs(p.ch.d)); });
+  sc.sort(function(a, b){ return a - b; });
+  var step = niceStep(sc.length ? sc[Math.floor(sc.length * 0.75)] / 2 : 1);
+  var counts = {n2: 0, n1: 0, p1: 0, p2: 0, p3: 0, na: 0}, seen = {};
+  // bbox
+  var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  paint.forEach(function(p){ var b = p.f.bb; if (b[0] < x0) x0 = b[0]; if (b[1] < y0) y0 = b[1]; if (b[2] > x1) x1 = b[2]; if (b[3] > y1) y1 = b[3]; });
+  var pad = Math.max(x1 - x0, y1 - y0) * 0.04;
+  svg.setAttribute("viewBox", [x0 - pad, y0 - pad, (x1 - x0) + 2 * pad, (y1 - y0) + 2 * pad].map(function(v){ return v.toFixed(1); }).join(" "));
+  var NS = "http://www.w3.org/2000/svg";
+  paint.forEach(function(p){
+    var s = p.s, c;
+    if (s == null) c = "na"; else if (s <= -step) c = "n2"; else if (s < 0) c = "n1"; else if (s < step) c = "p1"; else if (s < 2 * step) c = "p2"; else c = "p3";
+    var key = p.x.lev + p.x.k; if (!seen[key]) { counts[c]++; seen[key] = 1; }
+    var e = document.createElementNS(NS, "path"); e.setAttribute("d", p.f.d); e.setAttribute("class", "u c-" + c); e.__p = p; svg.appendChild(e);
+  });
+  if (!S.sr) G.dep.forEach(function(d){ var e = document.createElementNS(NS, "path"); e.setAttribute("d", d); e.setAttribute("class", "dep"); svg.appendChild(e); });
+  // leyenda
+  var lg = $("m-legend"); clear(lg);
+  var f = function(v){ return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v) + (isPct ? "" : "%"); };
+  var r = m.dir === -1;
+  var labels = r ? [f(step) + " o más", "0 a " + f(step), f(-step) + " a 0", f(-2 * step) + " a " + f(-step), f(-2 * step) + " o menos"]
+                 : [f(-step) + " o menos", f(-step) + " a 0", "0 a " + f(step), f(step) + " a " + f(2 * step), f(2 * step) + " o más"];
+  ["n2", "n1", "p1", "p2", "p3"].forEach(function(k){ lg.appendChild(el("div", {cls: "sw", style: "background:var(--m-" + k + ")"})); });
+  lg.appendChild(el("div", {cls: "na"}, [el("i", {style: "background:var(--m-na)"}), "Sin comparación: " + counts.na]));
+  ["n2", "n1", "p1", "p2", "p3"].forEach(function(k, i){ lg.appendChild(el("div", {}, [el("span", {style: "color:var(--ink)", text: labels[i]}), el("br"), String(counts[k])])); });
+  var note = "Mapa aproximado con límites anteriores a 2025.";
+  if (S.lev === "D") { var miss = units.filter(function(x){ return !feats.D[x.u]; }).length; if (miss) note += " " + miss + " distritos de este ámbito no tienen polígono propio (se crearon hace poco)."; }
+  else note += " Putumayo aparece dentro de Maynas.";
+  $("m-note").textContent = note + " Pasa el cursor para ver el detalle; haz clic para abrir la ficha.";
+  svg.setAttribute("aria-label", "Mapa del cambio en " + m.label + " por " + LEV[S.lev].sg);
+}
+function setupMapEvents(){
+  var svg = $("map"), tip = $("tip"), fig = svg.parentNode;
+  svg.addEventListener("mousemove", function(e){
+    var p = e.target.__p; if (!p) { tip.hidden = true; return; }
+    var m = M[S.ind], ch = p.ch; clear(tip);
+    tip.appendChild(el("b", {text: p.x.name})); tip.appendChild(el("div", {cls: "ct", text: p.x.parent}));
+    var y = pyears(S.pair);
+    tip.appendChild(el("div", {text: y[0] + ": " + (m.unit === "pct" ? fP(ch.a) : fN(ch.a)) + " · " + y[1] + ": " + (m.unit === "pct" ? fP(ch.b) : fN(ch.b))}));
+    tip.appendChild(el("div", {cls: cls(m, ch.d), style: "font-weight:700", text: ch.d == null ? ch.why : (m.unit === "pct" ? fD(ch.d) : fD(ch.d, "%"))}));
+    tip.hidden = false;
+    var r = fig.getBoundingClientRect(), x = e.clientX - r.left + 14, yy = e.clientY - r.top + 14;
+    if (x + tip.offsetWidth > r.width) x = e.clientX - r.left - tip.offsetWidth - 14;
+    tip.style.left = Math.max(0, x) + "px"; tip.style.top = yy + "px";
+  });
+  svg.addEventListener("mouseleave", function(){ tip.hidden = true; });
+  svg.addEventListener("click", function(e){ var p = e.target.__p; if (p) openFicha(p.x); });
+}
+
+/* ---------- cita ---------- */
+function renderCite(){
+  var m = M[S.ind], R = rankData(), box = $("cite"), y = pyears(S.pair);
+  var best = R.ok.filter(function(r){ return r.s > 0; })[0];
+  if (!best) { box.hidden = true; return; }
+  var x = best.x, ch = best.ch, w = m.dir ? "el mayor avance" : "el mayor aumento", t;
+  if (m.unit === "pct") t = "Entre " + y[0] + " y " + y[1] + ", " + m.long + " en " + x.name + " (" + x.parent + ") pasó de " + fP(ch.a) + (ch.na != null ? " (" + fN(ch.na) + " " + m.cu + ")" : "") + " a " + fP(ch.b) + (ch.nb != null ? " (" + fN(ch.nb) + " " + m.cu + ")" : "") + ", " + fD(ch.d) + ", " + w + " entre " + LEV[S.lev].art + " " + R.ok.length + " " + LEV[S.lev].pl + " comparables " + scopeLabel() + ".";
+  else t = "Entre " + y[0] + " y " + y[1] + ", " + m.long + " en " + x.name + " (" + x.parent + ") pasó de " + fN(ch.a) + " a " + fN(ch.b) + " (" + fD(ch.d, "%") + "), " + w + " entre " + LEV[S.lev].art + " " + R.ok.length + " " + LEV[S.lev].pl + " comparables " + scopeLabel() + ".";
+  t += " Fuente: INEI, Censos Nacionales " + y[0] + " y " + y[1] + ".";
+  $("cite-t").textContent = t; box.hidden = false;
+}
+function copy(text, btn){
+  var done = function(){ var o = btn.textContent; btn.textContent = "Copiado"; setTimeout(function(){ btn.textContent = o; }, 1500); };
+  try { navigator.clipboard.writeText(text).then(done, function(){ selectText(btn); }); } catch (e) { selectText(btn); }
+}
+function selectText(btn){ var p = btn.parentNode.querySelector("p"); if (!p) return; var r = document.createRange(); r.selectNodeContents(p); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Texto seleccionado: usa Ctrl+C"; }
+
+/* ---------- ficha ---------- */
+function openFicha(x){ S.terr = x; go("ficha"); }
+function renderFicha(){
+  var x = S.terr || {lev: "R", k: 0, name: "Perú", parent: "", region: null};
+  var isPeru = x.lev === "R" && x.k === 0;
+  var cr = $("f-crumbs"); clear(cr);
+  var crumb = function(t, unit){ return unit ? el("button", {text: t, onclick: function(){ openFicha(unit); }}) : el("span", {style: "color:var(--ink)", text: t}); };
+  var parts = [];
+  if (!isPeru) parts.push(crumb("Perú", {lev: "R", k: 0, name: "Perú", parent: ""}));
+  if (x.lev === "P" || x.lev === "D") parts.push(crumb(rname(x.region), U.filter(function(z){ return z.lev === "R" && z.region === x.region; })[0]));
+  if (x.lev === "D") { var pk = provByU[x.prov]; parts.push(crumb(D.P.n[pk], U.filter(function(z){ return z.lev === "P" && z.k === pk; })[0])); }
+  parts.push(crumb(x.name, null));
+  parts.forEach(function(p, i){ if (i) cr.appendChild(el("span", {text: "/"})); cr.appendChild(p); });
+  $("f-kind").textContent = isPeru ? "País" : LEV[x.lev].sg;
+  $("f-name").textContent = x.name;
+  var pob = vals(x.lev, x.k, "POB")[2], vop = vals(x.lev, x.k, "VOP")[2];
+  $("f-facts").textContent = pob != null ? fN(pob) + " personas censadas en 2025 · " + fN(vop) + " viviendas ocupadas" : "";
+  segButtons($("per2"), PAIRS.map(function(p){ return {v: p, t: p.replace("-", "–")}; }), S.pair, function(v){ S.pair = v; renderFicha(); });
+  var body = $("f-body"); clear(body);
+  // alertas de distrito
+  var limits = x.lev === "D" && !D.D.comp[S.pair][x.k];
+  if (x.lev === "D") {
+    var al = [], y0 = pyears(S.pair);
+    if (D.D.old[x.k]) al.push("Nombre en censos anteriores: " + D.D.old[x.k] + ".");
+    if (!D.D.e07[x.k]) al.push("El distrito no existía en 2007" + (!D.D.e17[x.k] ? " ni en 2017" : "") + ": se creó después.");
+    PAIRS.forEach(function(p){ if (!D.D.comp[p][x.k] && (D.D.e07[x.k] || p === "2017-2025")) { var yy = pyears(p); al.push("Su provincia cambió de distritos entre " + yy[0] + " y " + yy[1] + ", así que ese cambio no se calcula por distrito."); } });
+    al = al.filter(function(a, i){ return al.indexOf(a) === i; });
+    if (al.length) {
+      var pk0 = provByU[x.prov], pu = U.filter(function(z){ return z.lev === "P" && z.k === pk0; })[0];
+      var kids = [el("b", {text: "Aviso de ubigeo. "}), al.join(" ")];
+      if (limits) { kids.push(" "); kids.push(el("button", {cls: "linkbtn", text: "Ver la provincia de " + D.P.n[pk0], onclick: function(){ openFicha(pu); }})); }
+      body.appendChild(el("div", {cls: "warnbox"}, kids));
+    }
+  }
+  // destacado
+  var y = pyears(S.pair), cand = [];
+  D.meta.forEach(function(m){ if (m.unit !== "pct" || !m.dir) return; var ch = change(m, x.lev, x.k, S.pair); if (ch.d != null) cand.push({m: m, ch: ch, s: score(m, ch.d)}); });
+  if (cand.length) {
+    cand.sort(function(a, b){ return a.s - b.s; });
+    var pick = cand[0].s < 0 ? cand[0] : cand[cand.length - 1], m = pick.m, ch = pick.ch, worse = pick.s < 0;
+    var txt = m.label + ": de " + fP(ch.a) + " en " + y[0] + " a " + fP(ch.b) + " en " + y[1] + ".";
+    var txt2 = (ch.na != null && ch.nb != null) ? "En número: de " + fN(ch.na) + " a " + fN(ch.nb) + " " + m.cu + "." : "";
+    if (!isPeru) { var rk = rankOf(m, x); if (rk) txt2 += " Es " + (rk.pos === 1 ? "el " : "el " + rk.pos + ".º ") + (worse ? "mayor retroceso" : "mayor avance") + " entre " + rk.n + " " + LEV[x.lev].pl + " comparables."; }
+    body.appendChild(el("div", {cls: "callout" + (worse ? "" : " up")}, [el("span", {cls: "big " + (worse ? "dn" : "up"), text: fD(ch.d)}), el("div", {cls: "txt"}, [el("b", {text: txt}), el("span", {style: "font-size:14px;color:var(--ink2)", text: txt2})])]));
+  }
+  body.appendChild(el("div", {cls: "legendline"}, [
+    el("span", {}, [el("i", {style: "width:12px;height:3px;background:var(--accent);display:inline-block"}), "Mejora"]),
+    el("span", {}, [el("i", {style: "width:12px;height:3px;background:var(--down);display:inline-block"}), "Empeora"]),
+    el("span", {}, [el("span", {cls: "badge b-eq", text: "="}), "Misma definición"]),
+    el("span", {}, [el("span", {cls: "badge b-ap", text: "≈"}), "Definición similar"]),
+    el("span", {}, [el("span", {cls: "badge b-no", text: "No comparable"}), "La pregunta o los límites cambiaron"])
+  ]));
+  D.cats.forEach(function(cat){
+    var sec = el("div", {cls: "cat"}, [el("h2", {text: cat})]);
+    var t = el("table", {cls: "t f"});
+    t.appendChild(el("thead", {}, [el("tr", {}, [el("th", {scope: "col", text: "INDICADOR"}), el("th", {scope: "col", text: "2007"}), el("th", {scope: "col", text: "2017"}), el("th", {scope: "col", text: "2025"}), el("th", {scope: "col", style: "color:var(--ink)", text: "CAMBIO " + S.pair.replace("-", "–")}), el("th", {scope: "col", text: isPeru ? "" : "PERÚ 2025"}), el("th", {scope: "col", style: "text-align:left;padding-left:16px", text: "COMPARABILIDAD"})])]));
+    var tb = el("tbody");
+    BYCAT[cat].forEach(function(m){
+      var v = vals(x.lev, x.k, m.id), c = cnts(x.lev, x.k, m.id), ch = change(m, x.lev, x.k, S.pair), pv = D.R.v[m.id][0][2];
+      var badge = ch.d != null ? (m.notes[S.pair].indexOf("Similar") === 0 ? ["≈", "b-ap"] : ["=", "b-eq"]) : ["No comparable", "b-no"];
+      var note = "";
+      if (!m.cmp[S.pair] || m.notes[S.pair] !== "Misma definición.") note = m.notes[S.pair];
+      else if (ch.d == null && !limits) note = ch.why + ".";
+      if (limits && m.cmp[S.pair]) badge = ["Límites", "b-no"];
+      var cell = function(i){ return el("td", {}, [el("div", {cls: "pc", style: i === 2 ? "font-weight:700" : i === 0 ? "color:var(--muted)" : "", text: m.unit === "pct" ? fP(v[i]) : fN(v[i])}), m.unit === "pct" && c[i] != null ? el("div", {cls: "ct", text: fN(c[i])}) : null]); };
+      tb.appendChild(el("tr", {}, [
+        el("td", {}, [el("div", {style: "font-weight:600", text: m.label}), el("div", {cls: "ct", text: m.unit === "pct" ? "% y número de " + m.cu : "Número de " + m.cu}), note ? el("div", {cls: "ct", style: "margin-top:3px;max-width:44ch", text: note}) : null]),
+        cell(0), cell(1), cell(2),
+        el("td", {cls: cls(m, ch.d), style: "font-weight:700;font-size:15px"}, [ch.d == null ? "—" : (m.unit === "pct" ? fD(ch.d) : fD(ch.d, "%")), ch.dn != null ? el("div", {cls: "ct", style: "font-weight:400", text: fDN(ch.dn)}) : null]),
+        el("td", {cls: "ct", text: isPeru || m.unit !== "pct" ? "" : fP(pv)}),
+        el("td", {style: "text-align:left;padding-left:16px"}, [el("span", {cls: "badge " + badge[1], text: badge[0]})])
+      ]));
+    });
+    t.appendChild(tb);
+    sec.appendChild(el("div", {cls: "tablebox"}, [t]));
+    body.appendChild(sec);
+  });
+}
+function rankOf(m, x){
+  var list = U.filter(function(z){ return z.lev === x.lev; }).map(function(z){ var ch = change(m, z.lev, z.k, S.pair); return {z: z, s: score(m, ch.d)}; }).filter(function(r){ return r.s != null; });
+  var me = list.filter(function(r){ return r.z.k === x.k; })[0]; if (!me) return null;
+  var worse = me.s < 0;
+  var pos = list.filter(function(r){ return worse ? r.s < me.s : r.s > me.s; }).length + 1;
+  return {pos: pos, n: list.length};
+}
+
+/* ---------- búsqueda ---------- */
+function setupSearch(inp, res){
+  var i = $(inp), r = $(res), act = -1, items = [];
+  var close = function(){ r.hidden = true; act = -1; };
+  i.addEventListener("input", function(){
+    var q = norm(i.value.trim()); clear(r); act = -1;
+    if (q.length < 2) { close(); return; }
+    items = U.filter(function(x){ return x.q.indexOf(q) >= 0; }).sort(function(a, b){ var sa = a.q.indexOf(q) === 0 ? 0 : 1, sb = b.q.indexOf(q) === 0 ? 0 : 1; return sa - sb || "RPD".indexOf(a.lev) - "RPD".indexOf(b.lev) || a.q.localeCompare(b.q); }).slice(0, 12);
+    if (!items.length) { r.appendChild(el("li", {}, [el("span", {style: "display:block;padding:8px 11px", cls: "muted", text: "Sin resultados"})])); r.hidden = false; return; }
+    items.forEach(function(x){ r.appendChild(el("li", {}, [el("button", {type: "button", onclick: function(){ i.value = ""; close(); openFicha(x); }}, [x.name + " ", el("small", {text: LEV[x.lev].sg + (x.parent ? " · " + x.parent : "")})])])); });
+    r.hidden = false;
+  });
+  i.addEventListener("keydown", function(e){
+    var bs = r.querySelectorAll("button");
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (!bs.length) return; act = (act + (e.key === "ArrowDown" ? 1 : -1) + bs.length) % bs.length; bs.forEach(function(b, k){ b.classList.toggle("act", k === act); }); }
+    else if (e.key === "Enter") { e.preventDefault(); if (bs.length) bs[Math.max(act, 0)].click(); }
+    else if (e.key === "Escape") close();
+  });
+  i.addEventListener("blur", function(){ setTimeout(close, 150); });
+}
+
+/* ---------- vistas ---------- */
+function go(v){
+  S.view = v;
+  ["comparador", "ficha", "metodo"].forEach(function(n){ $("v-" + n).hidden = n !== v; });
+  document.querySelectorAll(".nav button").forEach(function(b){ if (b.getAttribute("data-view") === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  if (v === "ficha") renderFicha(); else if (v === "comparador") renderAll();
+  window.scrollTo(0, 0);
+}
+function renderAll(){ renderControls(); renderSummary(); renderMap(); renderRanks(); renderFull(); renderCite(); }
+
+Promise.all([fetch("data/censos.json").then(function(r){ return r.json(); }), fetch("data/geo.json").then(function(r){ return r.json(); })]).then(function(res){
+  D = res[0]; G = res[1];
+  buildUnits(); setupControls(); prepGeo(); setupMapEvents();
+  $("loading").hidden = true; go("comparador");
+}).catch(function(err){ $("loading").textContent = "No se pudieron cargar los datos. Recarga la página."; console.error(err); });
+})();
+</script>
+
+<!-- Contador de visitas: el panel solo lo ve el dueño en https://perutrescensos.goatcounter.com -->
+<script data-goatcounter="https://perutrescensos.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
