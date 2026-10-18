@@ -395,7 +395,7 @@ function score(m, d){ return d == null ? null : d * (m.dir || 1); }
 function cls(m, d){ if (d == null || d === 0) return "nu"; var s = score(m, d); return s > 0 ? "up" : "dn"; }
 
 /* ---------- indicadores con categorías a elegir (paredes, techos, pisos, agua, desagüe) ---------- */
-var FAMNAME = {PARADE: ["Paredes", "paredes de"], TECADE: ["Techos", "techo de"], PISADE: ["Pisos", "piso de"], AGUARP: ["Agua", "agua de"], DESRP: ["Desagüe", "servicio higiénico conectado a"]};
+var FAMNAME = {PARADE: ["Paredes", "Viviendas con paredes de", "adecuado"], TECADE: ["Techos", "Viviendas con techo de", "adecuado"], PISADE: ["Pisos", "Viviendas con piso de", "adecuado"], AGUARP: ["Agua", "Viviendas con agua de", "acceso"], DESRP: ["Desagüe", "Viviendas con servicio higiénico conectado a", "acceso"], SINDNI: ["Documento de identidad", "Personas que respondieron", ""]};
 var SEL = {}, BASE = {};
 function initSel(){
   Object.keys(D.K || {}).forEach(function(f){
@@ -410,7 +410,7 @@ function applySel(f){
   ["R", "P", "D"].forEach(function(lev){
     var b = blk(lev), nk = lev === "R" ? "n" : "c";
     if (dflt) { b.v[f] = B[lev][0]; b[nk][f] = B[lev][1]; return; }   // valores originales, sin recalcular
-    var vop = b.v.VOP;
+    var vop = b.v[K.den || "VOP"];
     var n = vop.map(function(_, k){ return [0, 1, 2].map(function(j){ var t = 0; for (var q = 0; q < s.length; q++){ var x = K[lev][s[q]][k][j]; if (x == null) return null; t += x; } return t; }); });
     b[nk][f] = n;
     b.v[f] = n.map(function(r, k){ return r.map(function(x, j){ var t = vop[k][j]; return x == null || !t ? null : Math.round(1000 * x / t) / 10; }); });
@@ -418,17 +418,17 @@ function applySel(f){
   if (dflt) { m.label = B.label; m.def_ = B.def_; m.long = B.long; m.selnote = ""; return; }
   var picked = K.cats.filter(function(c){ return s.indexOf(c.id) >= 0; });
   m.label = FAMNAME[f][0] + ": tu selección";
-  m.long = "el porcentaje de viviendas con " + FAMNAME[f][1] + " lo elegido";
-  m.def_ = "Viviendas con " + FAMNAME[f][1] + ": " + (picked.length ? picked.map(function(c){ return c.label.charAt(0).toLowerCase() + c.label.slice(1); }).join("; ") : "ninguna opción elegida") + ". Es una selección propia, distinta de la definición recomendada";
+  m.long = "el porcentaje que entra en tu selección";
+  m.def_ = FAMNAME[f][1] + ": " + (picked.length ? picked.map(function(c){ return c.label.charAt(0).toLowerCase() + c.label.slice(1); }).join("; ") : "ninguna opción elegida") + ". Es una selección propia, distinta de la definición recomendada";
   var notes = picked.filter(function(c){ return c.note; }).map(function(c){ return c.label + ": " + c.note; });
-  m.selnote = notes.length ? " Ojo con la comparación entre censos. " + notes.join(" ") : "";
+  m.selnote = notes.length ? " Notas sobre lo elegido. " + notes.join(" ") : "";
 }
 function renderOpts(){
   var box = $("opts"), f = S.ind, K = D.K && D.K[f];
   clear(box); box.hidden = !K; if (!K) return;
   var dflt = isDef(f);
   box.appendChild(el("legend", {cls: "sr", text: "Qué se cuenta"}));
-  box.appendChild(el("div", {cls: "hd"}, [el("b", {text: "Qué se cuenta como " + (f === "AGUARP" || f === "DESRP" ? "acceso" : "adecuado")}), el("span", {text: "Marca o desmarca opciones: el mapa, las listas y las tablas se recalculan."})]));
+  box.appendChild(el("div", {cls: "hd"}, [el("b", {text: FAMNAME[f][2] ? "Qué se cuenta como " + FAMNAME[f][2] : "Qué se cuenta"}), el("span", {text: "Marca o desmarca opciones: el mapa, las listas y las tablas se recalculan."})]));
   var ul = el("ul");
   K.cats.forEach(function(c){
     var inp = el("input", {type: "checkbox", value: c.id});
@@ -526,9 +526,10 @@ function gapText(m, su, ch){
   var miss = m.dir > 0 ? T - c[i1] : c[i1];
   if (miss <= 0) return "";
   var custom = BASE[m.id] && !isDef(m.id);
-  var t = "En " + y[1] + ", " + fBig(miss) + " " + m.cu + " " + (custom ? "no entraban en tu selección" : m.gap) + " en " + (su.lev === "R" && su.k === 0 ? "el país" : su.short) + ".";
+  var t = "En " + y[1] + ", " + fBig(miss) + " " + m.cu + " " + (custom ? (m.dir > 0 ? "no entraban en tu selección" : "estaban en tu selección") : m.gap) + " en " + (su.lev === "R" && su.k === 0 ? "el país" : su.short) + ".";
   if (ch.d == null) return t;
-  var left = m.dir > 0 ? 100 - ch.b : ch.b, rate = (m.dir > 0 ? ch.b - ch.a : ch.a - ch.b) / (y[1] - y[0]);
+  var T0 = vals(su.lev, su.k, m.dk)[ix(y[0])], ea = ch.na != null && T0 ? 100 * ch.na / T0 : ch.a, eb = 100 * c[i1] / T;   // con conteos exactos, no con % redondeados
+  var left = m.dir > 0 ? 100 - eb : eb, rate = (m.dir > 0 ? eb - ea : ea - eb) / (y[1] - y[0]);
   if (rate <= 0) return t + " Entre " + y[0] + " y " + y[1] + " la brecha no se redujo.";
   var n = left / rate;
   var yrs = n < 1 ? "menos de un año" : n > 100 ? "más de un siglo" : "unos " + (n >= 15 ? Math.round(n / 5) * 5 : Math.round(n)) + (Math.round(n) === 1 ? " año" : " años");
