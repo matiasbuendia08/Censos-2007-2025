@@ -185,13 +185,63 @@ for k in range(len(DI["u"])):
     if DI["n17"][k] and norm(DI["n17"][k]) != norm(DI["n"][k]): o.append(f"2017: {DI['n17'][k]}")
     old.append("; ".join(o))
 
+# ---------- comparabilidad por distrito ----------
+# Antes: si en una provincia se creaba un distrito, toda la provincia quedaba sin comparar.
+# Ahora solo quedan fuera, en cada par de censos: el distrito nuevo, su distrito de origen (ley de creación,
+# distritos_origen.tsv) y, por prudencia, los distritos de esa provincia que perdieron más de 30% de su población.
+import csv
+U = DI["u"]; IX = {u: k for k, u in enumerate(U)}; NAME = dict(zip(U, DI["n"]))
+POBV = DI["v"]["POB"]; e07 = [x is not None for x in DI["n07"]]; e17 = [x is not None for x in DI["n17"]]
+period = {}   # distrito nuevo -> periodo en que aparece
+for k, u in enumerate(U):
+    if not e07[k] and e17[k]: period[u] = "2007-2017"
+    elif not e17[k]: period[u] = "2017-2025"
+origin = {}   # distrito nuevo -> [distritos de origen]
+for row in csv.DictReader(open(HERE + "/distritos_origen.tsv", encoding="utf-8"), delimiter="\t"):
+    if row["ubigeo_nuevo"] in period and row["ubigeos_origen"]:
+        origin[row["ubigeo_nuevo"]] = [x.strip() for x in row["ubigeos_origen"].split(",") if x.strip() in IX]
+origin.setdefault("050104", []).append("050101")   # Carmen Alto: en la base 2007 va dentro del distrito Ayacucho
+EXTRA_07 = {"120606": "Recibió la zona en límite Mazamari–Pangoa que el censo 2007 registró aparte.",
+            "100603": "Cedió el centro poblado Margarita al distrito Irazola (Ucayali) en 2015."}
+SUB = {"2007-2017": ["2007-2017"], "2017-2025": ["2017-2025"], "2007-2025": ["2007-2017", "2017-2025"]}
+YI = {"2007": 0, "2017": 1, "2025": 2}
+comp, why = {}, {}
+for p in PAIRS:
+    a, b = YI[p[:4]], YI[p[5:]]
+    c = [1] * len(U); w = [""] * len(U)
+    for sub in SUB[p]:
+        news = [u for u, per in period.items() if per == sub]
+        kids = {}
+        for nu in news:
+            for o in origin.get(nu, []): kids.setdefault(o, []).append(NAME[nu])
+        for o, ns in kids.items():
+            k = IX[o]; c[k] = 0
+            lst = ns[0] if len(ns) == 1 else ", ".join(ns[:-1]) + " y " + ns[-1]
+            txt = f"De este distrito {'salió' if len(ns) == 1 else 'salieron'} {lst} entre {sub.replace('-', ' y ')}"
+            w[k] = (w[k] + "; " if w[k] else "") + txt
+        for pr in {u[:4] for u in news}:   # distritos de la provincia con caída fuerte de población
+            sa, sb = YI[sub[:4]], YI[sub[5:]]
+            for k, u in enumerate(U):
+                if u[:4] != pr or not c[k] or u in period and period[u] in SUB[p]: continue
+                x0, x1 = POBV[k][sa], POBV[k][sb]
+                if x0 and x1 is not None and x1 < 0.7 * x0:
+                    c[k] = 0; w[k] = f"Perdió {round(100 * (1 - x1 / x0))}% de su población entre {sub.replace('-', ' y ')}, en una provincia donde se crearon distritos: pudo ceder territorio"
+    if a == 0:
+        for u, t in EXTRA_07.items(): k = IX[u]; c[k] = 0; w[k] = (w[k] + "; " if w[k] else "") + t
+        k = IX["010201"]; c[k] = 0; w[k] = "En 2007 este código era el distrito La Peca, que incluía la ciudad de Bagua; en 2008 se separaron Bagua y La Peca"
+    for u, per in period.items():
+        if per in SUB[p] or (a == 0 and per == "2007-2017"): c[IX[u]] = 0
+    comp[p] = c; why[p] = w
+    old_n = sum(1 for x in DI["comp"][p] if not x); new_n = sum(1 for k, x in enumerate(c) if not x and not (u := U[k]) in period)
+    print(p, "distritos sin comparar antes:", old_n, "ahora (sin contar los nuevos):", new_n)
+
 data = dict(
     meta=meta, cats=[c for c, _ in CATS],
     R=dict(names=R["names"], v=pick(R, "v"), n=pick(R, "n")),
     P=dict(u=P["u"], r=P["r"], n=P["n"], v=pick(P, "v"), c=pick(P, "n_")),
     D=dict(u=DI["u"], r=DI["r"], n=DI["n"], old=old,
            e07=[x is not None for x in DI["n07"]], e17=[x is not None for x in DI["n17"]],
-           comp={p: [1 if x else 0 for x in DI["comp"][p]] for p in PAIRS},
+           comp=comp, why=why,
            v=pick(DI, "v"), c=pick(DI, "n_")),
     alerts={p: D0["alert_summary"][p] for p in PAIRS},
 )

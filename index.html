@@ -271,6 +271,9 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       <div class="tablebox"><table class="t" id="full"></table></div>
       <div style="margin-top:12px"><button class="btn" id="more" hidden>Mostrar más</button></div>
     </section>
+    <section class="wrap" id="fn-gap" hidden>
+      <p class="muted small" style="max-width:80ch;border-top:1px solid var(--rule);padding-top:12px;margin-top:8px">* Ritmo = cambio en puntos porcentuales entre los dos censos ÷ años entre ellos. Años para cerrar la brecha = lo que falta para llegar a 100% (o a 0% si el indicador debe bajar) ÷ ritmo. Por ejemplo, si un indicador pasó de 28.0% a 67.8% en 8 años, avanzó 5.0 puntos por año; le faltan 32.2 puntos, así que tardaría unos 6 años. Supone que el ritmo se mantiene igual; como el último tramo suele ser el más lento, es una estimación optimista.</p>
+    </section>
   </div>
 
   <!-- FICHA -->
@@ -321,7 +324,7 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       <h2>Territorios</h2>
       <ul>
         <li>Todo se muestra con la división territorial de 2025: 25 regiones, 196 provincias y 1,893 distritos. Lo que no existía en un censo antiguo queda sin dato; nada se suma ni se reparte.</li>
-        <li>Los distritos se cruzan solo por ubigeo, nunca por nombre. Entre 2007 y 2025 hay 63 distritos nuevos, 3 ubigeos que ya no existen, 13 cambios de nombre con el mismo ubigeo y 26 provincias cuyo conjunto de distritos cambió. En esas provincias el cambio por distrito no se calcula y se recomienda comparar la provincia completa.</li>
+        <li>Los distritos se cruzan solo por ubigeo, nunca por nombre. Entre 2007 y 2025 hay 63 distritos nuevos, 3 ubigeos que ya no existen y 13 cambios de nombre con el mismo ubigeo. Cuando se crea un distrito, el cambio no se calcula para el distrito nuevo ni para el distrito o distritos de los que se separó, según su ley de creación; el resto de la provincia se compara normalmente. Por prudencia, tampoco se calcula para los distritos de esas provincias que perdieron más de 30% de su población en el periodo, porque pudieron ceder territorio. Cada distrito afectado muestra el motivo en su ficha.</li>
         <li>Putumayo (Loreto) se creó en 2014 a partir de Maynas: no tiene dato en 2007, y el dato 2007 de Maynas incluye su territorio.</li>
         <li>Lima Metropolitana y Callao se presentan juntas como una región; el resto del departamento de Lima es Lima Provincias.</li>
       </ul>
@@ -382,7 +385,7 @@ function change(m, lev, k, pair){
   var y = pyears(pair), v = vals(lev, k, m.id), c = cnts(lev, k, m.id), a = v[ix(y[0])], b = v[ix(y[1])];
   var out = {a: a, b: b, na: c[ix(y[0])], nb: c[ix(y[1])], d: null, dn: null, why: ""};
   if (!m.cmp[pair]) { out.why = m.years.indexOf(y[0]) < 0 || m.years.indexOf(y[1]) < 0 ? "No existe en " + (m.years.indexOf(y[0]) < 0 ? y[0] : y[1]) : "Definición distinta"; return out; }
-  if (lev === "D" && !D.D.comp[pair][k]) { out.why = "Límites cambiaron"; return out; }
+  if (lev === "D" && !D.D.comp[pair][k]) { out.why = "Cambió su territorio"; return out; }
   if (a == null || b == null) { out.why = "Sin dato en " + (a == null ? y[0] : y[1]); return out; }
   if (m.unit === "pct") { out.d = Math.round((b - a) * 10) / 10; if (out.na != null && out.nb != null) out.dn = out.nb - out.na; }
   else { out.dn = b - a; out.d = a > 0 ? Math.round((b / a - 1) * 1000) / 10 : null; }
@@ -510,7 +513,7 @@ function renderSummary(){
     lead = "De " + LEV[S.lev].art + " " + list.all.length + " " + LEV[S.lev].pl + " " + scopeLabel() + ", " + up + " " + w[0] + " y " + dn + " " + w[1] + "." + (list.out ? " " + list.out + " no se pueden comparar." : "");
   }
   $("s-lead").textContent = lead;
-  var g = gapText(m, su, ch); $("s-gap").textContent = g; $("s-gap").hidden = !g;
+  var g = gapText(m, su, ch); $("s-gap").textContent = g; $("s-gap").hidden = !g; $("fn-gap").hidden = g.slice(-1) !== "*";
   $("vis").hidden = !ok; if (!ok) { $("fullsec").hidden = true; }
 }
 
@@ -529,7 +532,8 @@ function gapText(m, su, ch){
   if (rate <= 0) return t + " Entre " + y[0] + " y " + y[1] + " la brecha no se redujo.";
   var n = left / rate;
   var yrs = n < 1 ? "menos de un año" : n > 100 ? "más de un siglo" : "unos " + (n >= 15 ? Math.round(n / 5) * 5 : Math.round(n)) + (Math.round(n) === 1 ? " año" : " años");
-  return t + " Al ritmo de " + y[0] + "–" + y[1] + ", se tardaría " + yrs + " en cerrar la brecha.";
+  var r = Math.round(rate * 100) / 100, rt = (r < 1 ? r.toFixed(2) : r.toFixed(1)) + " puntos por año";
+  return t + " Al ritmo de " + y[0] + "–" + y[1] + " (" + (m.dir > 0 ? "+" : "−") + rt + "), se tardaría " + yrs + " en cerrar la brecha.*";
 }
 
 /* ---------- ranking ---------- */
@@ -598,7 +602,7 @@ function renderFull(){
 function distAlert(k, pair){
   var y = pyears(pair), t = [];
   if ((y[0] === 2007 && !D.D.e07[k]) || (y[0] === 2017 && !D.D.e17[k])) t.push("No existía en " + y[0]);
-  else if (!D.D.comp[pair][k]) t.push("Su provincia cambió de distritos entre " + y[0] + " y " + y[1] + ": comparar la provincia");
+  else if (!D.D.comp[pair][k]) t.push((D.D.why[pair][k] || "Sus límites cambiaron") + ": no se calcula el cambio del distrito; comparar la provincia");
   if (D.D.old[k]) t.push("Nombre anterior: " + D.D.old[k]);
   return t.join(" · ");
 }
@@ -695,7 +699,7 @@ function renderFicha(){
     var al = [], y0 = pyears(S.pair);
     if (D.D.old[x.k]) al.push("Nombre en censos anteriores: " + D.D.old[x.k] + ".");
     if (!D.D.e07[x.k]) al.push("El distrito no existía en 2007" + (!D.D.e17[x.k] ? " ni en 2017" : "") + ": se creó después.");
-    PAIRS.forEach(function(p){ if (!D.D.comp[p][x.k] && (D.D.e07[x.k] || p === "2017-2025")) { var yy = pyears(p); al.push("Su provincia cambió de distritos entre " + yy[0] + " y " + yy[1] + ", así que ese cambio no se calcula por distrito."); } });
+    PAIRS.forEach(function(p){ var wy = D.D.why[p][x.k]; if (!D.D.comp[p][x.k] && wy) { var yy = pyears(p); al.push(wy + ". Por eso el cambio " + yy[0] + "–" + yy[1] + " no se calcula para este distrito."); } });
     al = al.filter(function(a, i){ return al.indexOf(a) === i; });
     if (al.length) {
       var pk0 = provByU[x.prov], pu = U.filter(function(z){ return z.lev === "P" && z.k === pk0; })[0];
