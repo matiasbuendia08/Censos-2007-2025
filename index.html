@@ -92,6 +92,20 @@ select,input[type=search]{border:1px solid var(--line);background:var(--bg);padd
 .badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;font-size:12px;font-weight:700;border:1px solid currentColor;white-space:nowrap;box-sizing:border-box}
 .b-eq{color:var(--accent)} .b-ap{color:var(--muted)} .b-no{color:var(--down)}
 
+.result{padding-block:26px 8px;display:flex;flex-direction:column;gap:12px}
+.result h2{margin:0;font-family:var(--serif);font-size:28px;line-height:1.2;font-weight:600}
+.cmpline{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--ink2)}
+.cmpline details{flex-basis:100%;font-size:13px;color:var(--muted)}
+.cmpline summary{cursor:pointer;color:var(--accent);display:inline}
+.tiles{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:760px}
+@media (max-width:560px){.tiles{grid-template-columns:1fr 1fr!important}.tile.ch{grid-column:1/-1}}
+.rk-h{border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:0}
+table.t.mini{min-width:0;font-size:14px}
+table.mini th{border-bottom:0;padding-top:10px}
+table.mini td{padding:8px}
+table.mini td:first-child{text-align:left;padding-left:0;max-width:220px}
+table.mini .nmb{background:none;border:0;padding:0;text-align:left;font-weight:600;color:var(--ink);font-size:14px}
+table.mini .nmb:hover{color:var(--accent);text-decoration:underline}
 /* mapa y rankings */
 .grid2{padding-block:28px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:36px 48px;align-items:flex-start}
 .mapfig{flex:1 1 440px;min-width:0;margin:0;display:flex;flex-direction:column;gap:12px;position:relative}
@@ -138,8 +152,6 @@ table.t td{padding:9px 8px;border-bottom:1px solid var(--rule2);text-align:right
 .alert{font-size:12px;color:var(--warn-ink);margin-top:3px;font-weight:400}
 
 /* cita */
-.cite{margin-block:24px;background:var(--panel);padding:16px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
-.cite p{margin:0;font-size:14px;line-height:1.55}
 .btn{border:1px solid var(--line);background:var(--bg);padding:9px 16px}
 
 /* ficha */
@@ -202,37 +214,30 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
   <div id="v-comparador" hidden>
     <section class="wrap intro">
       <h1>¿Dónde cambió más el Perú?</h1>
-      <p>41 indicadores de los Censos Nacionales 2007, 2017 y 2025, por región, provincia y distrito. Cada cifra indica si se puede comparar entre censos. Los territorios corresponden a la división de 2025 y se cruzan por ubigeo.</p>
+      <p>Elige un indicador y un periodo: el mapa y las listas muestran qué territorios mejoraron y cuáles retrocedieron entre censos.</p>
     </section>
 
     <section class="wrap controls" aria-label="Opciones">
-      <div class="tabs" role="tablist" aria-label="Tema" id="cats"></div>
       <div class="row">
+        <div class="field grow"><label class="lab" for="cat">Tema</label><select id="cat"></select></div>
         <div class="field grow"><label class="lab" for="ind">Indicador</label><select id="ind"></select></div>
-        <div class="field"><span class="lab" id="lab-per">Periodo</span><div class="seg" role="group" aria-labelledby="lab-per" id="per"></div></div>
-        <div class="field"><span class="lab" id="lab-niv">Nivel</span><div class="seg" role="group" aria-labelledby="lab-niv" id="niv"></div></div>
       </div>
       <div class="row">
-        <div class="field grow"><label class="lab" for="sc-r">Ámbito: región</label><select id="sc-r"></select></div>
-        <div class="field grow"><label class="lab" for="sc-p">Ámbito: provincia</label><select id="sc-p"></select></div>
-        <div class="field grow search"><label class="lab" for="q1">Buscar un territorio</label><input id="q1" type="search" placeholder="Región, provincia o distrito" autocomplete="off"><ul class="results" id="q1r" hidden></ul></div>
+        <div class="field"><span class="lab" id="lab-per">Periodo</span><div class="seg" role="group" aria-labelledby="lab-per" id="per"></div></div>
+        <div class="field"><span class="lab" id="lab-niv">Ver por</span><div class="seg" role="group" aria-labelledby="lab-niv" id="niv"></div></div>
+        <div class="field grow"><label class="lab" for="sc-r">Región</label><select id="sc-r"></select></div>
       </div>
     </section>
 
-    <section class="wrap summary" aria-live="polite">
-      <div class="main">
-        <div><h2 id="s-title"></h2><div class="muted" id="s-unit" style="font-size:14px"></div></div>
-        <div class="tiles" id="s-tiles"></div>
-        <p class="lead" id="s-lead"></p>
-      </div>
-      <aside class="cmpbox" aria-labelledby="cmp-t">
-        <div class="lab" id="cmp-t">Comparabilidad</div>
-        <ul class="pairs" id="cmp-pairs"></ul>
-        <p class="note" id="cmp-def"></p>
-      </aside>
+    <section class="wrap result" aria-live="polite">
+      <h2 id="s-title"></h2>
+      <div class="muted" id="s-unit" style="font-size:14px"></div>
+      <div class="cmpline" id="cmp-line"></div>
+      <div class="tiles" id="s-tiles"></div>
+      <p class="lead" id="s-lead"></p>
     </section>
 
-    <section class="wrap grid2">
+    <section class="wrap grid2" id="vis">
       <figure class="mapfig">
         <figcaption><span class="h3" id="m-title"></span><span class="muted small" id="m-sub"></span></figcaption>
         <svg id="map" role="img" aria-labelledby="m-title"></svg>
@@ -241,9 +246,9 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <div class="tip" id="tip" hidden></div>
       </figure>
       <div class="ranks">
-        <div><div class="rk-head"><h3 class="h3" id="r1-t"></h3><span class="small muted" id="r-key"></span></div><div id="r1"></div><p class="note" id="r1-n"></p></div>
-        <div><div class="rk-head"><h3 class="h3" id="r2-t"></h3></div><div id="r2"></div><p class="note" id="r2-n"></p></div>
-        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><span class="note" id="r-scale"></span><button class="linkbtn" id="showall" aria-expanded="false"></button></div>
+        <div><h3 class="h3 rk-h" id="r1-t"></h3><div class="tablebox"><table class="t mini" id="r1"></table></div></div>
+        <div><h3 class="h3 rk-h" id="r2-t"></h3><div class="tablebox"><table class="t mini" id="r2"></table></div></div>
+        <div><button class="linkbtn" id="showall" aria-expanded="false"></button></div>
       </div>
     </section>
 
@@ -252,8 +257,6 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       <div class="tablebox"><table class="t" id="full"></table></div>
       <div style="margin-top:12px"><button class="btn" id="more" hidden>Mostrar más</button></div>
     </section>
-
-    <div class="wrap"><div class="cite" id="cite" hidden><div style="display:flex;flex-direction:column;gap:4px;flex:1 1 560px;min-width:0"><span class="lab">Para citar</span><p id="cite-t"></p></div><button class="btn" id="cite-b">Copiar</button></div></div>
   </div>
 
   <!-- FICHA -->
@@ -323,7 +326,7 @@ var D, G, M = {}, BYCAT = {};
 var YRS = [2007, 2017, 2025];
 var PAIRS = ["2007-2017", "2017-2025", "2007-2025"];
 var LEV = {R: {pl: "regiones", sg: "región", art: "las"}, P: {pl: "provincias", sg: "provincia", art: "las"}, D: {pl: "distritos", sg: "distrito", art: "los"}};
-var S = {cat: "Infraestructura y servicios básicos", ind: "SB3RP", pair: "2017-2025", lev: "P", sr: "", sp: "", view: "comparador", terr: null, all: false, sort: null, shown: 50};
+var S = {cat: "Infraestructura y servicios básicos", ind: "SB3RP", pair: "2017-2025", pref: "2017-2025", lev: "P", sr: "", sp: "", view: "comparador", terr: null, all: false, sort: null, shown: 50};
 var $ = function(id){ return document.getElementById(id); };
 function el(tag, attrs, kids){ var e = document.createElement(tag); if (attrs) for (var k in attrs){ if (k === "text") e.textContent = attrs[k]; else if (k === "cls") e.className = attrs[k]; else if (k.slice(0,2) === "on") e.addEventListener(k.slice(2), attrs[k]); else e.setAttribute(k, attrs[k]); } (kids || []).forEach(function(c){ if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); }); return e; }
 function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); }
@@ -369,32 +372,27 @@ function cls(m, d){ if (d == null || d === 0) return "nu"; var s = score(m, d); 
 /* ---------- controles ---------- */
 function setupControls(){
   D.meta.forEach(function(m){ M[m.id] = m; (BYCAT[m.cat] = BYCAT[m.cat] || []).push(m); });
-  var cats = $("cats");
-  D.cats.forEach(function(c){ cats.appendChild(el("button", {role: "tab", "aria-selected": c === S.cat ? "true" : "false", text: c, onclick: function(){ S.cat = c; S.ind = BYCAT[c][0].id; fixPair(); S.all = false; renderAll(); }})); });
+  var c = $("cat"); D.cats.forEach(function(k){ c.appendChild(el("option", {value: k, text: k})); });
+  c.addEventListener("change", function(e){ S.cat = e.target.value; S.ind = BYCAT[S.cat][0].id; fixPair(); S.all = false; renderAll(); });
   $("ind").addEventListener("change", function(e){ S.ind = e.target.value; fixPair(); renderAll(); });
-  $("sc-r").addEventListener("change", function(e){ S.sr = e.target.value; S.sp = ""; renderAll(); });
-  $("sc-p").addEventListener("change", function(e){ S.sp = e.target.value; renderAll(); });
-  setupSearch("q1", "q1r"); setupSearch("q2", "q2r");
+  $("sc-r").addEventListener("change", function(e){ S.sr = e.target.value; renderAll(); });
+  setupSearch("q2", "q2r");
   document.querySelectorAll(".nav button").forEach(function(b){ b.addEventListener("click", function(){ go(b.getAttribute("data-view")); }); });
   $("home").addEventListener("click", function(e){ e.preventDefault(); go("comparador"); });
-  $("showall").addEventListener("click", function(){ S.all = !S.all; S.shown = 50; renderFull(); });
+  $("showall").addEventListener("click", function(){ S.all = !S.all; S.shown = 50; renderRanks(); renderFull(); });
   $("more").addEventListener("click", function(){ S.shown += 100; renderFull(); });
-  $("cite-b").addEventListener("click", function(){ copy($("cite-t").textContent, $("cite-b")); });
 }
-function fixPair(){ var m = M[S.ind]; if (!m.cmp[S.pair]) { var ok = PAIRS.filter(function(p){ return m.cmp[p]; }); if (ok.length) S.pair = ok.indexOf("2017-2025") >= 0 ? "2017-2025" : ok[0]; } }
-function segButtons(box, items, cur, on){ clear(box); items.forEach(function(it){ box.appendChild(el("button", {"aria-pressed": it.v === cur ? "true" : "false", text: it.t, onclick: function(){ on(it.v); }})); if (it.dis) box.lastChild.disabled = true; }); }
+function fixPair(){ var m = M[S.ind]; if (m.cmp[S.pref]) { S.pair = S.pref; return; } var ok = PAIRS.filter(function(p){ return m.cmp[p]; }); if (ok.length) S.pair = ok.indexOf("2017-2025") >= 0 ? "2017-2025" : ok[0]; }
+function segButtons(box, items, cur, on){ clear(box); items.forEach(function(it){ var b = el("button", {"aria-pressed": it.v === cur ? "true" : "false", text: it.t, onclick: function(){ on(it.v); }}); if (it.dis) { b.disabled = true; b.title = it.dis; } box.appendChild(b); }); }
 function renderControls(){
-  document.querySelectorAll("#cats button").forEach(function(b){ b.setAttribute("aria-selected", b.textContent === S.cat ? "true" : "false"); });
+  $("cat").value = S.cat;
   var s = $("ind"); clear(s); BYCAT[S.cat].forEach(function(m){ var o = el("option", {value: m.id, text: m.label}); if (m.id === S.ind) o.selected = true; s.appendChild(o); });
   var m = M[S.ind];
-  segButtons($("per"), PAIRS.map(function(p){ return {v: p, t: p.replace("-", "–") + (m.cmp[p] ? "" : " (n. c.)")}; }), S.pair, function(v){ S.pair = v; renderAll(); });
-  segButtons($("niv"), [{v: "R", t: "Regiones"}, {v: "P", t: "Provincias"}, {v: "D", t: "Distritos"}], S.lev, function(v){ S.lev = v; S.all = false; if (v === "R") { S.sr = ""; S.sp = ""; } if (v !== "D") S.sp = ""; renderAll(); });
+  segButtons($("per"), PAIRS.map(function(p){ return {v: p, t: p.replace("-", " → "), dis: m.cmp[p] ? "" : m.notes[p]}; }), S.pair, function(v){ S.pair = v; S.pref = v; renderAll(); });
+  segButtons($("niv"), [{v: "R", t: "Regiones"}, {v: "P", t: "Provincias"}, {v: "D", t: "Distritos"}], S.lev, function(v){ S.lev = v; S.all = false; if (v === "R") S.sr = ""; renderAll(); });
   var r = $("sc-r"); clear(r); r.appendChild(el("option", {value: "", text: "Todo el Perú"}));
   D.R.names.slice(1).forEach(function(n){ var o = el("option", {value: n, text: rname(n)}); if (n === S.sr) o.selected = true; r.appendChild(o); });
   r.disabled = S.lev === "R";
-  var p = $("sc-p"); clear(p); p.appendChild(el("option", {value: "", text: S.sr ? "Todas las provincias" : "Elige primero una región"}));
-  if (S.sr) D.P.u.forEach(function(u, k){ if (D.P.r[k] === S.sr) { var o = el("option", {value: u, text: D.P.n[k]}); if (u === S.sp) o.selected = true; p.appendChild(o); } });
-  p.disabled = S.lev !== "D" || !S.sr;
 }
 
 /* territorios del nivel dentro del ámbito, y el territorio que resume el ámbito */
@@ -408,43 +406,40 @@ function scopeLabel(){ return S.sp ? "de la provincia de " + D.P.n[provByU[S.sp]
 
 /* ---------- resumen ---------- */
 function renderSummary(){
-  var m = M[S.ind], su = scopeUnit(), v = vals(su.lev, su.k, m.id), c = cnts(su.lev, su.k, m.id);
+  var m = M[S.ind], su = scopeUnit(), v = vals(su.lev, su.k, m.id), c = cnts(su.lev, su.k, m.id), y = pyears(S.pair);
   $("s-title").textContent = m.label;
-  $("s-unit").textContent = (m.unit === "pct" ? "Porcentaje de " + m.den + " y, debajo, número de " + m.cu : "Número de " + m.cu) + ". " + (su.short === "Perú" ? "Perú" : su.short) + ".";
+  $("s-unit").textContent = (m.unit === "pct" ? "Porcentaje de " + m.den + "; debajo, el número de " + m.cu : "Número de " + m.cu) + ". " + su.short + ".";
+  // comparabilidad en una línea
+  var cl = $("cmp-line"); clear(cl);
+  var note = m.notes[S.pair], ok = m.cmp[S.pair], sim = ok && note.indexOf("Similar") === 0;
+  cl.appendChild(el("span", {cls: "badge " + (ok ? (sim ? "b-ap" : "b-eq") : "b-no"), text: ok ? (sim ? "≈" : "=") : "No comparable"}));
+  cl.appendChild(el("span", {text: ok ? (sim ? "Comparable con cautela entre " + y[0] + " y " + y[1] + "." : "Misma pregunta en " + y[0] + " y " + y[1] + ": se puede comparar.") : note}));
+  var det = el("details", {}, [el("summary", {text: "Qué mide y en qué cambió la pregunta"}), el("p", {style: "margin:6px 0 0;max-width:80ch", text: m.def_ + ". " + (note && note !== "Misma definición." ? note + " " : "") + (m.extra || "")})]);
+  cl.appendChild(det);
+  // tres cifras: año inicial, año final y cambio
   var t = $("s-tiles"); clear(t);
-  m.years.forEach(function(y){
-    var i = ix(y);
-    t.appendChild(el("div", {cls: "tile" + (y === 2007 ? " old" : "")}, [
-      el("span", {cls: "lab", text: (su.short === "Perú" ? "Perú " : "") + y}),
+  var ch = change(m, su.lev, su.k, S.pair);
+  y.forEach(function(yy, j){
+    var i = ix(yy);
+    t.appendChild(el("div", {cls: "tile" + (j === 0 ? " old" : "")}, [
+      el("span", {cls: "lab", text: String(yy)}),
       el("span", {cls: "big", text: m.unit === "pct" ? fP(v[i]) : fN(v[i])}),
       el("span", {cls: "sub", text: m.unit === "pct" ? (c[i] != null ? fN(c[i]) + " " + m.cu : "") : m.cu})
     ]));
   });
-  var ch = change(m, su.lev, su.k, S.pair), pl = S.pair.replace("-", "–");
-  var big = ch.d == null ? "No comparable" : (m.unit === "pct" ? fD(ch.d) : fD(ch.d, "%"));
   t.appendChild(el("div", {cls: "tile ch"}, [
-    el("span", {cls: "lab", text: "Cambio " + pl}),
-    el("span", {cls: "big " + cls(m, ch.d), style: ch.d == null ? "font-size:22px" : "", text: big}),
+    el("span", {cls: "lab", text: "Cambio"}),
+    el("span", {cls: "big " + cls(m, ch.d), style: ch.d == null ? "font-size:22px" : "", text: ch.d == null ? "No comparable" : (m.unit === "pct" ? fD(ch.d) : fD(ch.d, "%"))}),
     el("span", {cls: "sub", text: ch.d == null ? ch.why : (ch.dn != null ? fDN(ch.dn) + " " + m.cu : "")})
   ]));
-  // texto
-  var list = rankData(), y = pyears(S.pair), lead = "";
+  var list = rankData(), lead = "";
   if (ch.d != null) {
-    lead = "Entre " + y[0] + " y " + y[1] + ", " + m.long + " en " + su.name + (m.unit === "pct" ? " pasó de " + fP(ch.a) + " a " + fP(ch.b) + " (" + fD(ch.d) + ")." : " pasó de " + fN(ch.a) + " a " + fN(ch.b) + " (" + fD(ch.d, "%") + ").");
-    if (m.unit === "pct" && ch.dn != null) lead += " En número, " + (ch.dn >= 0 ? "son " + fN(ch.dn) + " " + m.cu + " más" : "son " + fN(-ch.dn) + " " + m.cu + " menos") + ".";
     var up = list.ok.filter(function(r){ return r.s > 0; }).length, dn = list.ok.filter(function(r){ return r.s < 0; }).length;
     var w = m.dir ? ["mejoraron", "empeoraron"] : ["subieron", "bajaron"];
-    lead += " De " + LEV[S.lev].art + " " + list.all.length + " " + LEV[S.lev].pl + " " + scopeLabel() + ", " + up + " " + w[0] + " y " + dn + " " + w[1] + (list.out ? "; " + list.out + " no se comparan" : "") + ".";
-  } else lead = ch.why === "Definición distinta" ? "La pregunta cambió entre " + y[0] + " y " + y[1] + ": se muestran los valores, pero no el cambio. Ver la nota de comparabilidad." : ch.why + ".";
+    lead = "De " + LEV[S.lev].art + " " + list.all.length + " " + LEV[S.lev].pl + " " + scopeLabel() + ", " + up + " " + w[0] + " y " + dn + " " + w[1] + "." + (list.out ? " " + list.out + " no se pueden comparar." : "");
+  }
   $("s-lead").textContent = lead;
-  // comparabilidad
-  var ul = $("cmp-pairs"); clear(ul);
-  PAIRS.forEach(function(p){
-    var b = m.cmp[p] ? (m.notes[p].indexOf("Similar") === 0 ? ["≈", "b-ap"] : ["=", "b-eq"]) : ["No comparable", "b-no"];
-    var txt = m.notes[p] || (m.cmp[p] ? "Misma definición" : "");
-    ul.appendChild(el("li", {cls: p === S.pair ? "on" : ""}, [el("span", {}, [el("b", {text: p.replace("-", "–") + " "}), el("span", {cls: "badge " + b[1], text: b[0]})]), el("span", {text: txt})]));
-  });
-  $("cmp-def").textContent = m.def_ + (m.den ? ". Universo: " + m.den + "." : ".") + (m.extra ? " " + m.extra : "");
+  $("vis").hidden = !ok; if (!ok) { $("fullsec").hidden = true; }
 }
 
 /* ---------- ranking ---------- */
@@ -455,47 +450,36 @@ function rankData(){
   return {all: all, ok: ok, out: out};
 }
 function renderRanks(){
-  var m = M[S.ind], R = rankData(), pos = R.ok.filter(function(r){ return r.s > 0; }), neg = R.ok.filter(function(r){ return r.s < 0; }).reverse();
-  var w = m.dir ? ["Mayores mejoras", "Mayores retrocesos"] : ["Mayores aumentos", "Mayores disminuciones"];
+  var m = M[S.ind]; if (!m.cmp[S.pair]) return;
+  var R = rankData(), pos = R.ok.filter(function(r){ return r.s > 0; }), neg = R.ok.filter(function(r){ return r.s < 0; }).reverse();
+  var w = m.dir ? ["Las 5 que más mejoraron", "Las 5 que más retrocedieron"] : ["Las 5 que más subieron", "Las 5 que más bajaron"];
   $("r1-t").textContent = w[0]; $("r2-t").textContent = w[1];
-  var shown = pos.slice(0, 8).concat(neg.slice(0, 8)), mx = 0;
-  shown.forEach(function(r){ mx = Math.max(mx, r.ch.a || 0, r.ch.b || 0); });
-  var top = m.unit === "pct" ? (mx > 50 ? 100 : niceMax(mx)) : niceMax(mx);
-  $("r-scale").textContent = shown.length ? "Escala de 0 a " + (m.unit === "pct" ? top + "%" : fN(top)) + "." : "";
-  $("r-key").textContent = "";
-  $("r-key").appendChild(el("span", {style: "display:inline-flex;gap:14px;align-items:center"}, [el("span", {style: "display:inline-flex;gap:6px;align-items:center"}, [el("i", {style: "width:9px;height:9px;border:1.5px solid var(--muted);border-radius:50%;display:inline-block;box-sizing:border-box"}), String(pyears(S.pair)[0])]), el("span", {style: "display:inline-flex;gap:6px;align-items:center"}, [el("i", {style: "width:9px;height:9px;background:var(--ink);border-radius:50%;display:inline-block"}), String(pyears(S.pair)[1])])]));
-  fillRank($("r1"), pos.slice(0, 8), m, top); fillRank($("r2"), neg.slice(0, 8), m, top);
-  $("r1-n").textContent = pos.length ? countNote(pos.slice(0, 8), m) : "Ningún territorio en este grupo.";
-  var n2 = neg.length ? countNote(neg.slice(0, 8), m) : "Ningún territorio en este grupo.";
-  if (R.out) n2 += (n2 ? " " : "") + R.out + " " + LEV[S.lev].pl + " no se comparan (sin dato, definición distinta o cambio de límites).";
-  $("r2-n").textContent = n2;
-  $("showall").textContent = S.all ? "Ocultar la tabla completa" : "Ver las " + R.all.length + " " + LEV[S.lev].pl + " en una tabla";
+  fillRank($("r1"), pos.slice(0, 5), m); fillRank($("r2"), neg.slice(0, 5), m);
+  $("showall").textContent = S.all ? "Ocultar la lista completa" : "Ver " + LEV[S.lev].art + " " + R.all.length + " " + LEV[S.lev].pl + " ordenadas".replace("ordenadas", S.lev === "D" ? "ordenados" : "ordenadas");
   $("showall").setAttribute("aria-expanded", S.all ? "true" : "false");
 }
-function niceMax(x){ if (x <= 0) return 1; var p = Math.pow(10, Math.floor(Math.log10(x))), f = x / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
-function countNote(rows, m){
-  if (m.unit !== "pct") return "";
-  var n = rows.filter(function(r){ return r.ch.dn != null && r.ch.dn !== 0 && Math.sign(r.ch.dn) !== Math.sign(r.ch.d); }).length;
-  if (!n) return "";
-  return "En " + n + " de " + rows.length + ", el número de " + m.cu + " se movió en sentido contrario al porcentaje: el total de " + (m.den.indexOf("viviendas") === 0 ? "viviendas" : m.den.indexOf("hogares") === 0 ? "hogares" : "personas") + " cambió más rápido.";
-}
-function fillRank(box, rows, m, top){
-  clear(box);
+function fillRank(t, rows, m){
+  clear(t);
+  var y = pyears(S.pair);
+  if (!rows.length) { t.appendChild(el("tbody", {}, [el("tr", {}, [el("td", {cls: "ct", text: "Ninguna en este grupo."})])])); return; }
+  t.appendChild(el("thead", {}, [el("tr", {}, [el("th", {scope: "col", text: ""}), el("th", {scope: "col", text: String(y[0])}), el("th", {scope: "col", text: String(y[1])}), el("th", {scope: "col", style: "color:var(--ink)", text: "CAMBIO"})])]));
+  var tb = el("tbody");
   rows.forEach(function(r){
-    var a = r.ch.a, b = r.ch.b, c = cls(m, r.ch.d);
-    var pa = Math.min(100, a / top * 100), pb = Math.min(100, b / top * 100);
-    var meta = m.unit === "pct" ? fP(a) + " → " + fP(b) + (r.ch.na != null ? " · " + fN(r.ch.na) + " → " + fN(r.ch.nb) + " " + m.cu : "") : fN(a) + " → " + fN(b) + " " + m.cu;
-    box.appendChild(el("div", {cls: "rk"}, [
-      el("div", {style: "min-width:0"}, [el("button", {cls: "nm", title: r.x.name, text: r.x.name, onclick: function(){ openFicha(r.x); }}), el("div", {cls: "meta", text: r.x.parent}), el("div", {cls: "meta", text: meta})]),
-      el("div", {cls: "db", "aria-hidden": "true"}, [el("div", {cls: "base"}), el("div", {cls: "seg2 bg-" + c, style: "left:" + Math.min(pa, pb) + "%;width:" + Math.abs(pb - pa) + "%"}), el("div", {cls: "dot a", style: "left:" + pa + "%"}), el("div", {cls: "dot b", style: "left:" + pb + "%"})]),
-      el("div", {cls: "d " + c, text: m.unit === "pct" ? fD(r.ch.d) : fD(r.ch.d, "%")})
+    var c = cls(m, r.ch.d), pct = m.unit === "pct";
+    var cell = function(v, n){ return el("td", {}, [el("div", {cls: "pc", text: pct ? fP(v) : fN(v)}), pct && n != null ? el("div", {cls: "ct", text: fN(n)}) : null]); };
+    tb.appendChild(el("tr", {}, [
+      el("td", {}, [el("button", {cls: "nmb", text: r.x.name, onclick: function(){ openFicha(r.x); }}), el("div", {cls: "ct", text: r.x.parent})]),
+      cell(r.ch.a, r.ch.na), cell(r.ch.b, r.ch.nb),
+      el("td", {cls: c, style: "font-weight:700;font-size:15px", text: pct ? fD(r.ch.d) : fD(r.ch.d, "%")})
     ]));
   });
+  t.appendChild(tb);
 }
+function niceMax(x){ if (x <= 0) return 1; var p = Math.pow(10, Math.floor(Math.log10(x))), f = x / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
 
 /* ---------- tabla completa ---------- */
 function renderFull(){
-  var sec = $("fullsec"); sec.hidden = !S.all; $("showall").textContent = S.all ? "Ocultar la tabla completa" : $("showall").textContent;
+  var sec = $("fullsec"); sec.hidden = !S.all;
   if (!S.all) return;
   var m = M[S.ind], y = pyears(S.pair), all = scopeUnits().map(function(x){ var ch = change(m, x.lev, x.k, S.pair); return {x: x, ch: ch, s: score(m, ch.d)}; });
   var sort = S.sort || {k: "s", dir: -1};
@@ -538,8 +522,8 @@ function renderMap(){
   var m = M[S.ind], svg = $("map"), y = pyears(S.pair);
   clear(svg);
   var isPct = m.unit === "pct";
-  $("m-title").textContent = "Cambio por " + LEV[S.lev].sg + ", " + y[0] + "–" + y[1];
-  $("m-sub").textContent = (isPct ? "Puntos porcentuales" : "Crecimiento en %") + (m.dir ? ". Azul: mejora · rojo: empeora." : ". Azul: sube · rojo: baja.");
+  $("m-title").textContent = "Cambio entre " + y[0] + " y " + y[1];
+  $("m-sub").textContent = (isPct ? "En puntos porcentuales" : "Crecimiento en %") + (m.dir ? ". Azul: mejoró · rojo: empeoró." : ". Azul: subió · rojo: bajó.");
   if (!m.cmp[S.pair]) { svg.setAttribute("viewBox", "0 0 400 60"); $("m-legend").textContent = ""; $("m-note").textContent = "Este indicador no se compara en el periodo elegido."; return; }
   // valores por polígono
   var paint = [];  // {key, d, x(unit)}
@@ -573,12 +557,9 @@ function renderMap(){
   var labels = r ? [f(step) + " o más", "0 a " + f(step), f(-step) + " a 0", f(-2 * step) + " a " + f(-step), f(-2 * step) + " o menos"]
                  : [f(-step) + " o menos", f(-step) + " a 0", "0 a " + f(step), f(step) + " a " + f(2 * step), f(2 * step) + " o más"];
   ["n2", "n1", "p1", "p2", "p3"].forEach(function(k){ lg.appendChild(el("div", {cls: "sw", style: "background:var(--m-" + k + ")"})); });
-  lg.appendChild(el("div", {cls: "na"}, [el("i", {style: "background:var(--m-na)"}), "Sin comparación: " + counts.na]));
-  ["n2", "n1", "p1", "p2", "p3"].forEach(function(k, i){ lg.appendChild(el("div", {}, [el("span", {style: "color:var(--ink)", text: labels[i]}), el("br"), String(counts[k])])); });
-  var note = "Mapa aproximado con límites anteriores a 2025.";
-  if (S.lev === "D") { var miss = units.filter(function(x){ return !feats.D[x.u]; }).length; if (miss) note += " " + miss + " distritos de este ámbito no tienen polígono propio (se crearon hace poco)."; }
-  else note += " Putumayo aparece dentro de Maynas.";
-  $("m-note").textContent = note + " Pasa el cursor para ver el detalle; haz clic para abrir la ficha.";
+  lg.appendChild(el("div", {cls: "na"}, [el("i", {style: "background:var(--m-na)"}), "Sin dato"]));
+  ["n2", "n1", "p1", "p2", "p3"].forEach(function(k, i){ lg.appendChild(el("div", {text: labels[i]})); });
+  $("m-note").textContent = "Pasa el cursor para ver el detalle y haz clic para abrir la ficha. Límites aproximados (ver Metodología).";
   svg.setAttribute("aria-label", "Mapa del cambio en " + m.label + " por " + LEV[S.lev].sg);
 }
 function setupMapEvents(){
@@ -598,23 +579,6 @@ function setupMapEvents(){
   svg.addEventListener("mouseleave", function(){ tip.hidden = true; });
   svg.addEventListener("click", function(e){ var p = e.target.__p; if (p) openFicha(p.x); });
 }
-
-/* ---------- cita ---------- */
-function renderCite(){
-  var m = M[S.ind], R = rankData(), box = $("cite"), y = pyears(S.pair);
-  var best = R.ok.filter(function(r){ return r.s > 0; })[0];
-  if (!best) { box.hidden = true; return; }
-  var x = best.x, ch = best.ch, w = m.dir ? "el mayor avance" : "el mayor aumento", t;
-  if (m.unit === "pct") t = "Entre " + y[0] + " y " + y[1] + ", " + m.long + " en " + x.name + " (" + x.parent + ") pasó de " + fP(ch.a) + (ch.na != null ? " (" + fN(ch.na) + " " + m.cu + ")" : "") + " a " + fP(ch.b) + (ch.nb != null ? " (" + fN(ch.nb) + " " + m.cu + ")" : "") + ", " + fD(ch.d) + ", " + w + " entre " + LEV[S.lev].art + " " + R.ok.length + " " + LEV[S.lev].pl + " comparables " + scopeLabel() + ".";
-  else t = "Entre " + y[0] + " y " + y[1] + ", " + m.long + " en " + x.name + " (" + x.parent + ") pasó de " + fN(ch.a) + " a " + fN(ch.b) + " (" + fD(ch.d, "%") + "), " + w + " entre " + LEV[S.lev].art + " " + R.ok.length + " " + LEV[S.lev].pl + " comparables " + scopeLabel() + ".";
-  t += " Fuente: INEI, Censos Nacionales " + y[0] + " y " + y[1] + ".";
-  $("cite-t").textContent = t; box.hidden = false;
-}
-function copy(text, btn){
-  var done = function(){ var o = btn.textContent; btn.textContent = "Copiado"; setTimeout(function(){ btn.textContent = o; }, 1500); };
-  try { navigator.clipboard.writeText(text).then(done, function(){ selectText(btn); }); } catch (e) { selectText(btn); }
-}
-function selectText(btn){ var p = btn.parentNode.querySelector("p"); if (!p) return; var r = document.createRange(); r.selectNodeContents(p); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Texto seleccionado: usa Ctrl+C"; }
 
 /* ---------- ficha ---------- */
 function openFicha(x){ S.terr = x; go("ficha"); }
@@ -731,7 +695,7 @@ function go(v){
   if (v === "ficha") renderFicha(); else if (v === "comparador") renderAll();
   window.scrollTo(0, 0);
 }
-function renderAll(){ renderControls(); renderSummary(); renderMap(); renderRanks(); renderFull(); renderCite(); }
+function renderAll(){ renderControls(); renderSummary(); if (M[S.ind].cmp[S.pair]) { renderMap(); renderRanks(); renderFull(); } }
 
 Promise.all([fetch("data/censos.json").then(function(r){ return r.json(); }), fetch("data/geo.json").then(function(r){ return r.json(); })]).then(function(res){
   D = res[0]; G = res[1];
