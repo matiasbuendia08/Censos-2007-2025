@@ -68,6 +68,18 @@ select,input[type=search]{border:1px solid var(--line);background:var(--bg);padd
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
 .seg button:disabled{color:var(--line);cursor:not-allowed}
+.opts{margin-top:14px;border:1px solid var(--rule);background:var(--panel);padding:12px 14px}
+.opts .hd{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin-bottom:8px}
+.opts .hd b{font-size:14px}
+.opts .hd span{font-size:13px;color:var(--muted)}
+.opts ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 16px}
+.opts li label{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.35;cursor:pointer;padding:3px 0}
+.opts li input{margin-top:3px;accent-color:var(--accent);flex:none}
+.opts .rec{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);padding:0 4px;margin-left:4px;white-space:nowrap}
+.opts .cn{display:block;font-size:12px;color:var(--muted)}
+.opts .ft{margin-top:8px;font-size:13px;color:var(--ink2)}
+.opts .ft button{margin-left:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* resumen */
 .summary{padding-block:28px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:28px 40px;align-items:flex-start}
@@ -218,6 +230,7 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <div class="field"><span class="lab" id="lab-niv">Ver por</span><div class="seg" role="group" aria-labelledby="lab-niv" id="niv"></div></div>
         <div class="field grow"><label class="lab" for="sc-r">Región</label><select id="sc-r"></select></div>
       </div>
+      <fieldset class="opts" id="opts" hidden></fieldset>
     </section>
 
     <section class="wrap result" aria-live="polite">
@@ -286,6 +299,14 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <li>Viviendas: particulares con ocupantes presentes (6,400,131; 7,698,900 y 10,167,523).</li>
         <li>Hogares: 6,754,074; 8,252,284 y 10,570,171.</li>
       </ul>
+      <h2>Vivienda y servicios básicos</h2>
+      <ul>
+        <li>Definición recomendada de material adecuado, según las agrupaciones del INEI en el procesamiento del censo 2025: paredes de ladrillo o bloque de cemento, o de piedra o sillar con cal o cemento (en 2025 también drywall); techos de concreto armado; y pisos de parquet o madera pulida, láminas asfálticas o vinílicos, o losetas, terrazos o cerámicos.</li>
+        <li>En paredes, techos, pisos, agua y desagüe puedes elegir qué opciones cuentan. Las categorías se armonizaron entre censos: cuando una opción se juntaba con otra en 2007 (adobe y tapia; pozo ciego y letrina; manantial y río) se muestran juntas, y las que no existen en algún censo (drywall antes de 2025, vecino en 2025) llevan aviso.</li>
+        <li>El censo 2007 no preguntó el material del techo, así que los techos solo se comparan entre 2017 y 2025.</li>
+        <li>Agua y desagüe por red pública cuentan la conexión dentro de la vivienda o fuera de ella pero dentro de la edificación (2007 y 2017) o del lote (2025). No incluyen pilón de uso público, camión cisterna, pozo, río ni vecino. La pregunta es la misma en los tres censos; en 2025 el agua se pregunta en dos pasos.</li>
+        <li>Electricidad: 2007 y 2017 preguntaron si la vivienda tenía alumbrado eléctrico por red pública; 2025 pregunta de dónde proviene principalmente la energía eléctrica. Por eso la luz y los tres servicios juntos se comparan con 2025 con cautela (≈).</li>
+      </ul>
       <h2>Territorios</h2>
       <ul>
         <li>Todo se muestra con la división territorial de 2025: 25 regiones, 196 provincias y 1,893 distritos. Lo que no existía en un censo antiguo queda sin dato; nada se suma ni se reparte.</li>
@@ -301,7 +322,7 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <li>Empleo: el Censo 2025 no lo preguntó. Para 2007 y 2017 se usa el conteo directo; en 2017 el INEI publicó una PEA mayor, estimada con modelos.</li>
       </ul>
       <h2>Mapa</h2>
-      <p>El mapa usa límites provinciales y distritales anteriores a 2025, de fuente pública. Por eso Putumayo aparece dentro de Maynas y unos 70 distritos creados recientemente no tienen polígono propio: su territorio se ve dentro del distrito del que salieron. Es una aproximación visual; las cifras de las tablas usan siempre los territorios de 2025.</p>
+      <p>El mapa usa los límites distritales censales del INEI con la división de 2017 (1,874 distritos; versión simplificada publicada en josedaniel-cb/limites-peru-geojson, licencia MIT). Las provincias y las regiones se arman uniendo esos distritos, así que Putumayo y sus cuatro distritos tienen polígono propio. Los 19 distritos creados entre 2017 y 2025 no lo tienen: su territorio se ve dentro del distrito del que salieron. Es una aproximación visual; las cifras de las tablas usan siempre los territorios de 2025.</p>
       <h2>Fuente</h2>
       <p>INEI – Censos Nacionales 2007: XI de Población y VI de Vivienda; 2017: XII de Población, VII de Vivienda y III de Comunidades Indígenas; 2025: XIII de Población, VIII de Vivienda y IV de Comunidades Indígenas. Elaboración propia.</p>
     </article>
@@ -360,6 +381,54 @@ function change(m, lev, k, pair){
 function score(m, d){ return d == null ? null : d * (m.dir || 1); }
 function cls(m, d){ if (d == null || d === 0) return "nu"; var s = score(m, d); return s > 0 ? "up" : "dn"; }
 
+/* ---------- indicadores con categorías a elegir (paredes, techos, pisos, agua, desagüe) ---------- */
+var FAMNAME = {PARADE: ["Paredes", "paredes de"], TECADE: ["Techos", "techo de"], PISADE: ["Pisos", "piso de"], AGUARP: ["Agua", "agua de"], DESRP: ["Desagüe", "servicio higiénico conectado a"]};
+var SEL = {}, BASE = {};
+function initSel(){
+  Object.keys(D.K || {}).forEach(function(f){
+    var m = M[f]; if (!m) return;
+    SEL[f] = D.K[f].def.slice();
+    BASE[f] = {label: m.label, def_: m.def_, long: m.long, R: [D.R.v[f], D.R.n[f]], P: [D.P.v[f], D.P.c[f]], D: [D.D.v[f], D.D.c[f]]};
+  });
+}
+function isDef(f){ var d = D.K[f].def, s = SEL[f]; return s.length === d.length && d.every(function(i){ return s.indexOf(i) >= 0; }); }
+function applySel(f){
+  var K = D.K[f], s = SEL[f], m = M[f], B = BASE[f], dflt = isDef(f);
+  ["R", "P", "D"].forEach(function(lev){
+    var b = blk(lev), nk = lev === "R" ? "n" : "c";
+    if (dflt) { b.v[f] = B[lev][0]; b[nk][f] = B[lev][1]; return; }   // valores originales, sin recalcular
+    var vop = b.v.VOP;
+    var n = vop.map(function(_, k){ return [0, 1, 2].map(function(j){ var t = 0; for (var q = 0; q < s.length; q++){ var x = K[lev][s[q]][k][j]; if (x == null) return null; t += x; } return t; }); });
+    b[nk][f] = n;
+    b.v[f] = n.map(function(r, k){ return r.map(function(x, j){ var t = vop[k][j]; return x == null || !t ? null : Math.round(1000 * x / t) / 10; }); });
+  });
+  if (dflt) { m.label = B.label; m.def_ = B.def_; m.long = B.long; m.selnote = ""; return; }
+  var picked = K.cats.filter(function(c){ return s.indexOf(c.id) >= 0; });
+  m.label = FAMNAME[f][0] + ": tu selección";
+  m.long = "el porcentaje de viviendas con " + FAMNAME[f][1] + " lo elegido";
+  m.def_ = "Viviendas con " + FAMNAME[f][1] + ": " + (picked.length ? picked.map(function(c){ return c.label.charAt(0).toLowerCase() + c.label.slice(1); }).join("; ") : "ninguna opción elegida") + ". Es una selección propia, distinta de la definición recomendada";
+  var notes = picked.filter(function(c){ return c.note; }).map(function(c){ return c.label + ": " + c.note; });
+  m.selnote = notes.length ? " Ojo con la comparación entre censos. " + notes.join(" ") : "";
+}
+function renderOpts(){
+  var box = $("opts"), f = S.ind, K = D.K && D.K[f];
+  clear(box); box.hidden = !K; if (!K) return;
+  var dflt = isDef(f);
+  box.appendChild(el("legend", {cls: "sr", text: "Qué se cuenta"}));
+  box.appendChild(el("div", {cls: "hd"}, [el("b", {text: "Qué se cuenta como " + (f === "AGUARP" || f === "DESRP" ? "acceso" : "adecuado")}), el("span", {text: "Marca o desmarca opciones: el mapa, las listas y las tablas se recalculan."})]));
+  var ul = el("ul");
+  K.cats.forEach(function(c){
+    var inp = el("input", {type: "checkbox", value: c.id});
+    inp.checked = SEL[f].indexOf(c.id) >= 0;
+    inp.addEventListener("change", function(){ var s = SEL[f], i = s.indexOf(c.id); if (inp.checked && i < 0) s.push(c.id); if (!inp.checked && i >= 0) s.splice(i, 1); applySel(f); renderAll(); });
+    var rec = K.def.indexOf(c.id) >= 0 ? el("span", {cls: "rec", text: "Recomendado"}) : null;
+    ul.appendChild(el("li", {}, [el("label", {}, [inp, el("span", {}, [c.label, rec, c.note ? el("span", {cls: "cn", text: c.note}) : null])])]));
+  });
+  box.appendChild(ul);
+  var ft = el("div", {cls: "ft"}, [dflt ? "Estás viendo la definición recomendada." : "Estás viendo tu propia selección.", dflt ? null : el("button", {cls: "linkbtn", text: "Volver a la recomendada", onclick: function(){ SEL[f] = K.def.slice(); applySel(f); renderAll(); }})]);
+  box.appendChild(ft);
+}
+
 /* ---------- controles ---------- */
 function setupControls(){
   D.meta.forEach(function(m){ M[m.id] = m; (BYCAT[m.cat] = BYCAT[m.cat] || []).push(m); });
@@ -384,6 +453,7 @@ function renderControls(){
   var r = $("sc-r"); clear(r); r.appendChild(el("option", {value: "", text: "Todo el Perú"}));
   D.R.names.slice(1).forEach(function(n){ var o = el("option", {value: n, text: rname(n)}); if (n === S.sr) o.selected = true; r.appendChild(o); });
   r.disabled = S.lev === "R";
+  renderOpts();
 }
 
 /* territorios del nivel dentro del ámbito, y el territorio que resume el ámbito */
@@ -405,7 +475,7 @@ function renderSummary(){
   var note = m.notes[S.pair], ok = m.cmp[S.pair], sim = ok && note.indexOf("Similar") === 0;
   cl.appendChild(el("span", {cls: "badge " + (ok ? (sim ? "b-ap" : "b-eq") : "b-no"), text: ok ? (sim ? "≈" : "=") : "No comparable"}));
   cl.appendChild(el("span", {text: ok ? (sim ? "Comparable con cautela entre " + y[0] + " y " + y[1] + "." : "Misma pregunta en " + y[0] + " y " + y[1] + ": se puede comparar.") : note}));
-  var det = el("details", {}, [el("summary", {text: "Qué mide y en qué cambió la pregunta"}), el("p", {style: "margin:6px 0 0;max-width:80ch", text: m.def_ + ". " + (note && note !== "Misma definición." ? note + " " : "") + (m.extra || "")})]);
+  var det = el("p", {cls: "defn", style: "margin:8px 0 0;max-width:80ch;flex-basis:100%;font-size:14px;color:var(--ink2)"}, [el("b", {style: "color:var(--ink)", text: "Definición: "}), m.def_ + ". " + (note && note !== "Misma definición." ? note + " " : "") + (m.extra || "") + (m.selnote || "")]);
   cl.appendChild(det);
   // tres cifras: año inicial, año final y cambio
   var t = $("s-tiles"); clear(t);
@@ -507,7 +577,7 @@ function distAlert(k, pair){
 /* ---------- mapa ---------- */
 var feats = null;
 function bboxOf(d){ var n = d.match(/-?[\d.]+/g), x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (var i = 0; i < n.length; i += 2){ var x = +n[i], y = +n[i+1]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } return [x0, y0, x1, y1]; }
-function prepGeo(){ feats = {P: {}, D: {}}; for (var u in G.prov) feats.P[u] = {d: G.prov[u], bb: bboxOf(G.prov[u])}; for (var w in G.dist) feats.D[w] = {d: G.dist[w], bb: bboxOf(G.dist[w])}; }
+function prepGeo(){ feats = {R: {}, P: {}, D: {}}; for (var r in G.reg) feats.R[r] = {d: G.reg[r], bb: bboxOf(G.reg[r])}; for (var u in G.prov) feats.P[u] = {d: G.prov[u], bb: bboxOf(G.prov[u])}; for (var w in G.dist) feats.D[w] = {d: G.dist[w], bb: bboxOf(G.dist[w])}; }
 function niceStep(x){ var c = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 15, 20, 25, 50, 100]; for (var i = 0; i < c.length; i++) if (c[i] >= x) return c[i]; return 100; }
 function renderMap(){
   var m = M[S.ind], svg = $("map"), y = pyears(S.pair);
@@ -522,7 +592,7 @@ function renderMap(){
   units.forEach(function(x){ byU[x.u] = x; });
   if (S.lev === "D") units.forEach(function(x){ var f = feats.D[x.u]; if (f) paint.push({f: f, x: x}); });
   else if (S.lev === "P") units.forEach(function(x){ var f = feats.P[x.u]; if (f) paint.push({f: f, x: x}); });
-  else D.P.u.forEach(function(u, k){ var f = feats.P[u]; if (!f) return; var r = D.P.r[k]; paint.push({f: f, x: U.filter(function(z){ return z.lev === "R" && z.region === r; })[0]}); });
+  else units.forEach(function(x){ var f = feats.R[x.region]; if (f) paint.push({f: f, x: x}); });
   var sc = [];
   paint.forEach(function(p){ p.ch = change(m, p.x.lev, p.x.k, S.pair); p.s = score(m, p.ch.d); if (p.s != null) sc.push(Math.abs(p.ch.d)); });
   sc.sort(function(a, b){ return a - b; });
@@ -690,7 +760,7 @@ function renderAll(){ renderControls(); renderSummary(); if (M[S.ind].cmp[S.pair
 
 Promise.all([fetch("data/censos.json").then(function(r){ return r.json(); }), fetch("data/geo.json").then(function(r){ return r.json(); })]).then(function(res){
   D = res[0]; G = res[1];
-  buildUnits(); setupControls(); prepGeo(); setupMapEvents();
+  buildUnits(); setupControls(); initSel(); prepGeo(); setupMapEvents();
   $("loading").hidden = true; go("comparador");
 }).catch(function(err){ $("loading").textContent = "No se pudieron cargar los datos. Recarga la página."; console.error(err); });
 })();

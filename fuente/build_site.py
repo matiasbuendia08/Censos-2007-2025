@@ -1,16 +1,31 @@
+import os as _os; HERE = _os.path.dirname(_os.path.abspath(__file__)).replace('\\', '/')
 """Arma los datos de la página: site/data/censos.json y site/data/geo.json."""
 import json, math, os, re, unicodedata
 
-G = "/tmp/claude-0/-home-claude/1417c317-d5e8-5ec7-b3d0-d63f525322f7/scratchpad/geo/"
-OUT = "/home/claude/web/site/data/"
+G = HERE + "/../geo/"
+OUT = HERE + "/out/data/"
 os.makedirs(OUT, exist_ok=True)
-D0 = json.load(open("/home/claude/web/data.json"))
+D0 = json.load(open(HERE + "/data.json", encoding="utf-8"))
 M0 = {m["id"]: m for m in D0["meta"]}
 PAIRS = ["2007-2017", "2017-2025", "2007-2025"]
 
+# Materiales adecuados = reverso exacto del inadecuado: las categorías de material suman el total de viviendas
+# ocupadas en los tres censos (sin "no sabe"), así que adecuado = VOP - inadecuado.
+REV = {"PARADE": "PARINA", "TECADE": "TECINA", "PISADE": "PISTIE"}
+for blk, nk in (("regions", "n"), ("provs", "n_"), ("dists", "n_")):
+    B = D0[blk]
+    for new, old in REV.items():
+        B["v"][new] = []; B[nk][new] = []
+        for vop_v, bad in zip(B["v"]["VOP"], B[nk][old]):
+            n = [None if (t is None or b is None) else t - b for t, b in zip(vop_v, bad)]
+            B[nk][new].append(n)
+            B["v"][new].append([None if (x is None or not t) else round(100 * x / t, 1) for x, t in zip(n, vop_v)])
+for new, old in REV.items():
+    M0[new] = dict(M0[old], id=new)
+
 CATS = [
  ("Población y hogares", ["POB", "HOG", "URB", "MEN15", "MAY65", "JEFAM", "MIGR5", "NACEXT"]),
- ("Vivienda", ["VOP", "PARNOB", "PARINA", "TECINA", "PISTIE", "HACINA", "HAB1"]),
+ ("Vivienda", ["VOP", "PARADE", "TECADE", "PISADE", "HACINA", "HAB1"]),
  ("Infraestructura y servicios básicos", ["SB3RP", "AGUARP", "DESRP", "ELECRP"]),
  ("Conectividad y bienes", ["CELUL", "INTFIJ", "PCLAP", "REFRI", "AUTO", "MOTO"]),
  ("Energía para cocinar", ["COMBCON", "LENA", "GLP"]),
@@ -30,10 +45,10 @@ L = {
  "MIGR5": ("Vivía en otro distrito o país hace 5 años", "el porcentaje de personas que vivía en otro distrito o país cinco años antes", 0),
  "NACEXT": ("Nacidos en otro país", "el porcentaje de personas nacidas en otro país", 0),
  "VOP": ("Viviendas ocupadas", "el número de viviendas ocupadas", 0),
- "PARNOB": ("Paredes de material noble", "el porcentaje de viviendas con paredes de material noble", 1),
- "PARINA": ("Paredes inadecuadas", "el porcentaje de viviendas con paredes inadecuadas", -1),
- "TECINA": ("Techo inadecuado", "el porcentaje de viviendas con techo inadecuado", -1),
- "PISTIE": ("Piso de tierra", "el porcentaje de viviendas con piso de tierra", -1),
+ "PARADE": ("Paredes adecuadas", "el porcentaje de viviendas con paredes de material adecuado", 1),
+ "TECADE": ("Techos adecuados", "el porcentaje de viviendas con techo de concreto armado", 1),
+ "PISADE": ("Pisos adecuados", "el porcentaje de viviendas con piso adecuado", 1),
+
  "HACINA": ("Hacinamiento", "el porcentaje de viviendas hacinadas", -1),
  "HAB1": ("Vivienda de una sola habitación", "el porcentaje de viviendas de una sola habitación", -1),
  "SB3RP": ("Tres servicios básicos (agua, desagüe y luz)", "el porcentaje de viviendas con agua, desagüe y luz por red pública", 1),
@@ -80,11 +95,13 @@ COC07 = "No comparable: en 2007 se preguntó solo por la energía principal para
 LM2 = "No comparable: en 2025 se puede declarar más de una lengua materna y el castellano sube por las respuestas múltiples."
 EMP = "No existe en 2025: el censo no preguntó por empleo."
 NOTES = {
- "PARNOB": {"2017-2025": "Misma definición. En 2025 el drywall es una opción aparte."},
- "PARINA": {"2007-2017": SIM07, "2017-2025": "Misma definición; en 2025 el drywall cuenta como material adecuado.", "2007-2025": SIM07},
- "TECINA": {"2007-2017": "No existe en 2007: ese censo no preguntó el material del techo.", "2007-2025": "No existe en 2007: ese censo no preguntó el material del techo.", "2017-2025": "Misma definición; en 2025 el drywall cuenta como material adecuado."},
- "AGUARP": {"2017-2025": "Misma definición. En 2017 el agua del vecino era una opción aparte y no se cuenta."},
- "ELECRP": {"2017-2025": "Similar: en 2017 se preguntó si tenía alumbrado eléctrico por red pública; en 2025, la fuente de energía."},
+ "PARADE": {"2007-2017": "Misma definición: los materiales adecuados (ladrillo o bloque, piedra o sillar con cal o cemento) son opciones en los tres censos.", "2017-2025": "Misma definición. En 2025 el drywall, que aparece como opción aparte, cuenta como adecuado (0.2% de las viviendas).", "2007-2025": "Misma definición. En 2025 el drywall, que aparece como opción aparte, cuenta como adecuado (0.2% de las viviendas)."},
+ "TECADE": {"2007-2017": "No existe en 2007: ese censo no preguntó el material del techo.", "2007-2025": "No existe en 2007: ese censo no preguntó el material del techo.", "2017-2025": "Misma definición."},
+ "PISADE": {"2007-2017": "Misma definición.", "2017-2025": "Misma definición.", "2007-2025": "Misma definición."},
+ "AGUARP": {"2007-2017": "Misma definición. El agua del vecino es una opción aparte y no se cuenta.", "2017-2025": "Misma definición. En 2017 el agua del vecino era una opción aparte y no se cuenta; en 2025 la pregunta va en dos pasos (red pública y luego dentro o fuera de la vivienda).", "2007-2025": "Misma definición. En 2025 la pregunta va en dos pasos (red pública y luego dentro o fuera de la vivienda)."},
+ "DESRP": {"2007-2017": "Misma definición.", "2017-2025": "Misma definición. 2025 dice 'dentro del lote o terreno' donde 2017 decía 'dentro de la edificación'.", "2007-2025": "Misma definición. 2025 dice 'dentro del lote o terreno' donde 2007 decía 'dentro de la edificación'."},
+ "ELECRP": {"2007-2017": "Misma definición: la misma pregunta en ambos censos.", "2017-2025": "Similar: 2007 y 2017 preguntaron si la vivienda tenía alumbrado eléctrico por red pública (sí o no); 2025 pregunta de dónde proviene principalmente la energía eléctrica (red pública, panel solar, generador u otro).", "2007-2025": "Similar: 2007 y 2017 preguntaron si la vivienda tenía alumbrado eléctrico por red pública (sí o no); 2025 pregunta de dónde proviene principalmente la energía eléctrica (red pública, panel solar, generador u otro)."},
+ "SB3RP": {"2007-2017": "Misma definición.", "2017-2025": "Similar: agua y desagüe tienen la misma definición; la luz cambió de pregunta (2007 y 2017: alumbrado eléctrico por red pública, sí o no; 2025: fuente principal de energía eléctrica, red pública).", "2007-2025": "Similar: agua y desagüe tienen la misma definición; la luz cambió de pregunta (2007 y 2017: alumbrado eléctrico por red pública, sí o no; 2025: fuente principal de energía eléctrica, red pública)."},
  "INTFIJ": {"2017-2025": "No comparable: 2017 preguntó por conexión a internet sin separar fijo y móvil; 2025 los separa (aquí, internet fijo).", "2007-2025": "No comparable: 2007 preguntó por conexión a internet; 2025 separa fijo y móvil (aquí, internet fijo)."},
  "PCLAP": {"2007-2017": "No comparable: en 2007 solo se preguntó por computadora.", "2007-2025": "No comparable: en 2007 solo se preguntó por computadora."},
  "AUTO": {"2007-2017": "No existe en 2007.", "2007-2025": "No existe en 2007."},
@@ -116,13 +133,15 @@ DEF = {
  "POB": "Población censada", "HOG": "Hogares en viviendas particulares con ocupantes presentes", "URB": "Población que vive en área urbana, según la definición del censo",
  "MEN15": "Población de 0 a 14 años", "MAY65": "Población de 65 años a más", "JEFAM": "Hogares cuya jefa de hogar es mujer",
  "MIGR5": "Personas de 5 años a más que vivían en otro distrito o país cinco años antes del censo", "NACEXT": "Personas nacidas en otro país",
- "VOP": "Viviendas particulares con ocupantes presentes", "PARNOB": "Paredes de ladrillo o bloque de cemento, o de piedra o sillar con cal o cemento",
- "PARINA": "Paredes de adobe, tapia, quincha, piedra con barro, madera, triplay, calamina, estera u otro material",
- "TECINA": "Techo de calamina o fibrocemento, caña o estera con barro, triplay, estera o carrizo, paja u otro material",
- "PISTIE": "Viviendas con piso de tierra", "HACINA": "Viviendas con más de 3.4 personas por habitación", "HAB1": "Viviendas de una sola habitación",
- "SB3RP": "Viviendas con agua y desagüe por red pública (dentro o fuera de la vivienda) y alumbrado eléctrico por red pública, los tres a la vez",
- "AGUARP": "Agua por red pública, dentro o fuera de la vivienda", "DESRP": "Desagüe por red pública, dentro o fuera de la vivienda",
- "ELECRP": "Alumbrado eléctrico por red pública", "CELUL": "Hogares con al menos un teléfono celular", "INTFIJ": "Hogares con conexión a internet (2025: internet fijo)",
+ "VOP": "Viviendas particulares con ocupantes presentes el día del censo (no incluye viviendas desocupadas ni colectivas)",
+ "PARADE": "Viviendas cuyas paredes exteriores son de ladrillo o bloque de cemento, o de piedra o sillar con cal o cemento (en 2025 también drywall). Se consideran no adecuadas, por su vulnerabilidad ante sismos y lluvias, las de adobe, tapia, quincha, piedra con barro, madera, triplay, calamina, estera u otro material",
+ "TECADE": "Viviendas con techo de concreto armado. Se consideran no adecuados la madera, las tejas, las planchas de calamina o fibrocemento, la caña o estera con torta de barro, el triplay, la estera o el carrizo, la paja u hojas de palmera, el drywall y otros materiales",
+ "PISADE": "Viviendas con piso de parquet o madera pulida, láminas asfálticas o vinílicos, o losetas, terrazos o cerámicos (agrupación del INEI). No incluye cemento, madera en entablado, tierra ni otros materiales",
+ "HACINA": "Viviendas con más de 3.4 personas por habitación (sin contar baño, cocina ni pasadizos), el umbral de hacinamiento del INEI", "HAB1": "Viviendas que tienen una sola habitación en total",
+ "SB3RP": "Viviendas con agua por red pública, desagüe por red pública y electricidad por red pública, los tres a la vez. Agua y desagüe cuentan dentro de la vivienda o fuera de ella pero dentro de la edificación o del lote",
+ "AGUARP": "Viviendas con agua por red pública, dentro de la vivienda o fuera de ella pero dentro de la edificación (2025: dentro del lote o terreno). No incluye pilón de uso público, camión cisterna, pozo, río ni vecino",
+ "DESRP": "Viviendas con servicio higiénico conectado a la red pública de desagüe, dentro de la vivienda o fuera de ella pero dentro de la edificación (2025: dentro del lote o terreno). No incluye pozo séptico, letrina ni pozo ciego",
+ "ELECRP": "Viviendas con electricidad por red pública (2007 y 2017: alumbrado eléctrico por red pública; 2025: la red pública es la fuente principal de energía eléctrica)", "CELUL": "Hogares con al menos un teléfono celular", "INTFIJ": "Hogares con conexión a internet (2025: internet fijo)",
  "PCLAP": "Hogares con computadora, laptop o tablet", "REFRI": "Hogares con refrigeradora o congeladora", "AUTO": "Hogares con automóvil o camioneta",
  "MOTO": "Hogares con motocicleta", "COMBCON": "Hogares que cocinan solo con leña, carbón, bosta u otro combustible contaminante, sin gas ni electricidad",
  "LENA": "Hogares que cocinan con leña", "GLP": "Hogares que cocinan con gas de balón", "ANALF15": "Personas de 15 años a más que no saben leer ni escribir",
@@ -167,36 +186,6 @@ data = dict(
     alerts={p: D0["alert_summary"][p] for p in PAIRS},
 )
 s = json.dumps(data, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
-open(OUT + "censos.json", "w").write(s); print("censos.json", round(len(s) / 1e6, 2), "MB")
+open(OUT + "censos.json", "w", encoding="utf-8").write(s); print("censos.json", round(len(s) / 1e6, 2), "MB")
 
-# ---------- geometría proyectada ----------
-lon0, lat0 = -81.4, 0.0
-c = math.cos(math.radians(9.2)); S = 41.0
-def pt(lo, la): return ((lo - lon0) * c * S + 6, (lat0 - la) * S + 6)
-def rings(g): return g["coordinates"] if g["type"] == "Polygon" else [r for p in g["coordinates"] for r in p]
-def path(g, dec=1):
-    out = []
-    for r in rings(g):
-        seg = []; last = None
-        for p in r:
-            x, y = pt(*p[:2]); q = (round(x, dec), round(y, dec))
-            if q != last: seg.append(q); last = q
-        if len(seg) > 2:
-            fmt = (lambda v: f"{v:g}")
-            out.append("M" + "L".join(f"{fmt(x)},{fmt(y)}" for x, y in seg) + "Z")
-    return "".join(out)
-gp = json.load(open(G + "peru_provincial_simple.geojson")); gd = json.load(open(G + "peru_departamental_simple.geojson"))
-gdi = json.load(open(G + "peru_distrital_simple.geojson"))
-u25 = set(DI["u"])
-def merge(pairs):
-    out = {}
-    for k, d in pairs: out[k] = out.get(k, "") + d   # un código con varios polígonos: se juntan, no se pisan
-    return out
-geo = dict(
-    w=int((-68.6 - lon0) * c * S + 12), h=int((lat0 + 18.4) * S + 12),
-    prov=merge((f["properties"]["FIRST_IDPR"], path(f["geometry"])) for f in gp["features"] if f["geometry"]),
-    dep=[path(f["geometry"]) for f in gd["features"]],
-    dist=merge((f["properties"]["IDDIST"], path(f["geometry"], 2)) for f in gdi["features"] if f["properties"]["IDDIST"] in u25 and f["geometry"]),
-)
-s = json.dumps(geo, separators=(",", ":"))
-open(OUT + "geo.json", "w").write(s); print("geo.json", round(len(s) / 1e6, 2), "MB", len(geo["prov"]), len(geo["dist"]))
+
