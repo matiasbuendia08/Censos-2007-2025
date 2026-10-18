@@ -56,7 +56,7 @@ L = {
  "DESRP": ("Desagüe por red pública", "el porcentaje de viviendas con desagüe por red pública", 1),
  "ELECRP": ("Electricidad por red pública", "el porcentaje de viviendas con electricidad por red pública", 1),
  "CELUL": ("Celular", "el porcentaje de hogares con celular", 1),
- "INTFIJ": ("Internet", "el porcentaje de hogares con internet", 1),
+ "INTFIJ": ("Internet en el hogar", "el porcentaje de hogares con internet", 1),
  "PCLAP": ("Computadora, laptop o tablet", "el porcentaje de hogares con computadora, laptop o tablet", 1),
  "REFRI": ("Refrigeradora", "el porcentaje de hogares con refrigeradora", 1),
  "AUTO": ("Auto o camioneta", "el porcentaje de hogares con auto o camioneta", 0),
@@ -102,7 +102,7 @@ NOTES = {
  "DESRP": {"2007-2017": "Misma definición.", "2017-2025": "Misma definición. 2025 dice 'dentro del lote o terreno' donde 2017 decía 'dentro de la edificación'.", "2007-2025": "Misma definición. 2025 dice 'dentro del lote o terreno' donde 2007 decía 'dentro de la edificación'."},
  "ELECRP": {"2007-2017": "Misma definición: la misma pregunta en ambos censos.", "2017-2025": "Similar: 2007 y 2017 preguntaron si la vivienda tenía alumbrado eléctrico por red pública (sí o no); 2025 pregunta de dónde proviene principalmente la energía eléctrica (red pública, panel solar, generador u otro).", "2007-2025": "Similar: 2007 y 2017 preguntaron si la vivienda tenía alumbrado eléctrico por red pública (sí o no); 2025 pregunta de dónde proviene principalmente la energía eléctrica (red pública, panel solar, generador u otro)."},
  "SB3RP": {"2007-2017": "Misma definición.", "2017-2025": "Similar: agua y desagüe tienen la misma definición; la luz cambió de pregunta (2007 y 2017: alumbrado eléctrico por red pública, sí o no; 2025: fuente principal de energía eléctrica, red pública).", "2007-2025": "Similar: agua y desagüe tienen la misma definición; la luz cambió de pregunta (2007 y 2017: alumbrado eléctrico por red pública, sí o no; 2025: fuente principal de energía eléctrica, red pública)."},
- "INTFIJ": {"2017-2025": "No comparable: 2017 preguntó por conexión a internet sin separar fijo y móvil; 2025 los separa (aquí, internet fijo).", "2007-2025": "No comparable: 2007 preguntó por conexión a internet; 2025 separa fijo y móvil (aquí, internet fijo)."},
+ "INTFIJ": {"2007-2017": "Misma definición.", "2017-2025": "Similar: 2007 y 2017 preguntaron si el hogar tenía conexión a internet, sin separar fijo y móvil; 2025 pregunta por internet fijo y por internet móvil por separado, y aquí se suman (el hogar tiene uno u otro). Parte del salto puede deberse al cambio de pregunta: en 2017 algunos hogares con solo datos en el celular pudieron responder que no.", "2007-2025": "Similar: 2007 y 2017 preguntaron si el hogar tenía conexión a internet, sin separar fijo y móvil; 2025 pregunta por internet fijo y por internet móvil por separado, y aquí se suman (el hogar tiene uno u otro). Parte del salto puede deberse al cambio de pregunta: en 2017 algunos hogares con solo datos en el celular pudieron responder que no."},
  "PCLAP": {"2007-2017": "No comparable: en 2007 solo se preguntó por computadora.", "2007-2025": "No comparable: en 2007 solo se preguntó por computadora."},
  "AUTO": {"2007-2017": "No existe en 2007.", "2007-2025": "No existe en 2007."},
  "MOTO": {"2007-2017": "No existe en 2007.", "2007-2025": "No existe en 2007."},
@@ -123,6 +123,7 @@ EXTRA = {
  "PEA14": "Conteo directo de los microdatos. En 2017 el INEI publicó una PEA mayor, estimada con modelos (16.5 millones frente a 13.0 millones aquí).",
  "DES14": "Conteo directo de los microdatos. En 2017 el INEI publicó una PEA mayor, estimada con modelos.",
 }
+CMP = {"INTFIJ": {"2007-2017": True, "2017-2025": True, "2007-2025": True}}
 def note_for(i, p, m):
     if i in NOTES and p in NOTES[i]: return NOTES[i][p]
     if m["cmp"][p]: return "Similar." if clean({"2007-2017": m["n1707"], "2017-2025": m["n1725"], "2007-2025": m["n0725"]}[p]).startswith("Similar") else "Misma definición."
@@ -141,7 +142,7 @@ DEF = {
  "SB3RP": "Viviendas con agua por red pública, desagüe por red pública y electricidad por red pública, los tres a la vez. Agua y desagüe cuentan dentro de la vivienda o fuera de ella pero dentro de la edificación o del lote",
  "AGUARP": "Viviendas con agua por red pública, dentro de la vivienda o fuera de ella pero dentro de la edificación (2025: dentro del lote o terreno). No incluye pilón de uso público, camión cisterna, pozo, río ni vecino",
  "DESRP": "Viviendas con servicio higiénico conectado a la red pública de desagüe, dentro de la vivienda o fuera de ella pero dentro de la edificación (2025: dentro del lote o terreno). No incluye pozo séptico, letrina ni pozo ciego",
- "ELECRP": "Viviendas con electricidad por red pública (2007 y 2017: alumbrado eléctrico por red pública; 2025: la red pública es la fuente principal de energía eléctrica)", "CELUL": "Hogares con al menos un teléfono celular", "INTFIJ": "Hogares con conexión a internet (2025: internet fijo)",
+ "ELECRP": "Viviendas con electricidad por red pública (2007 y 2017: alumbrado eléctrico por red pública; 2025: la red pública es la fuente principal de energía eléctrica)", "CELUL": "Hogares con al menos un teléfono celular", "INTFIJ": "Hogares con conexión a internet (2007 y 2017: conexión a internet; 2025: internet fijo o móvil)",
  "PCLAP": "Hogares con computadora, laptop o tablet", "REFRI": "Hogares con refrigeradora o congeladora", "AUTO": "Hogares con automóvil o camioneta",
  "MOTO": "Hogares con motocicleta", "COMBCON": "Hogares que cocinan solo con leña, carbón, bosta u otro combustible contaminante, sin gas ni electricidad",
  "LENA": "Hogares que cocinan con leña", "GLP": "Hogares que cocinan con gas de balón", "ANALF15": "Personas de 15 años a más que no saben leer ni escribir",
@@ -152,15 +153,24 @@ DEF = {
  "LM_CAST": "Personas de 3 años a más cuya lengua materna es el castellano", "PEA14": "Población económicamente activa como porcentaje de la población de 14 años a más",
  "DES14": "Desocupados como porcentaje de la población económicamente activa de 14 años a más",
 }
+# Frase de "lo que falta": (texto, id del total). Solo indicadores con meta clara y total en la página.
+GAP = {
+ "PARADE": ("aún no tenían paredes adecuadas", "VOP"), "TECADE": ("aún no tenían techo de concreto", "VOP"), "PISADE": ("aún no tenían piso adecuado", "VOP"),
+ "HACINA": ("aún estaban hacinadas", "VOP"), "SB3RP": ("aún no tenían los tres servicios básicos", "VOP"),
+ "AGUARP": ("aún no tenían agua por red pública", "VOP"), "DESRP": ("aún no tenían desagüe por red pública", "VOP"), "ELECRP": ("aún no tenían electricidad por red pública", "VOP"),
+ "CELUL": ("aún no tenían celular", "HOG"), "INTFIJ": ("aún no tenían internet", "HOG"), "PCLAP": ("aún no tenían computadora, laptop ni tablet", "HOG"),
+ "REFRI": ("aún no tenían refrigeradora", "HOG"), "COMBCON": ("aún cocinaban solo con combustibles contaminantes", "HOG"), "LENA": ("aún cocinaban con leña", "HOG"),
+ "SINSEG": ("aún no tenían seguro de salud", "POB"), "SINDNI": ("aún no tenían DNI", "POB"),
+}
 meta = []
 for cat, ids in CATS:
     for i in ids:
         m = M0[i]
         cu = COUNT_UNIT.get(i) or CU.get(m["den"], "personas")
         meta.append(dict(id=i, cat=cat, label=L[i][0], long=L[i][1], dir=L[i][2], unit=m["unit"], den=m["den"],
-                         cu=cu, years=m["years"], cmp=m["cmp"], def_=DEF[i],
+                         cu=cu, years=m["years"], cmp=CMP.get(i, m["cmp"]), def_=DEF[i],
                          notes={p: note_for(i, p, m) for p in PAIRS},
-                         extra=EXTRA.get(i, "")))
+                         extra=EXTRA.get(i, ""), **({"gap": GAP[i][0], "dk": GAP[i][1]} if i in GAP else {})))
 
 def pick(block, key, idx=None):
     return {i: block[key][i] for i in IDS}

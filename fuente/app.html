@@ -239,6 +239,7 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       <div class="cmpline" id="cmp-line"></div>
       <div class="tiles" id="s-tiles"></div>
       <p class="lead" id="s-lead"></p>
+      <p class="lead" id="s-gap" hidden></p>
     </section>
 
     <section class="wrap grid2" id="vis">
@@ -304,6 +305,7 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <li>Definición recomendada de material adecuado, según las agrupaciones del INEI en el procesamiento del censo 2025: paredes de ladrillo o bloque de cemento, o de piedra o sillar con cal o cemento (en 2025 también drywall); techos de concreto armado; y pisos de parquet o madera pulida, láminas asfálticas o vinílicos, o losetas, terrazos o cerámicos.</li>
         <li>En paredes, techos, pisos, agua y desagüe puedes elegir qué opciones cuentan. Las categorías se armonizaron entre censos: cuando una opción se juntaba con otra en 2007 (adobe y tapia; pozo ciego y letrina; manantial y río) se muestran juntas, y las que no existen en algún censo (drywall antes de 2025, vecino en 2025) llevan aviso.</li>
         <li>El censo 2007 no preguntó el material del techo, así que los techos solo se comparan entre 2017 y 2025.</li>
+        <li>Internet: 2007 y 2017 preguntaron si el hogar tenía conexión a internet; 2025 pregunta por internet fijo y por internet móvil por separado. Para comparar, en 2025 se cuenta el hogar que tiene uno u otro. Se compara con cautela (≈): parte del salto puede venir del cambio de pregunta.</li>
         <li>Agua y desagüe por red pública cuentan la conexión dentro de la vivienda o fuera de ella pero dentro de la edificación (2007 y 2017) o del lote (2025). No incluyen pilón de uso público, camión cisterna, pozo, río ni vecino. La pregunta es la misma en los tres censos; en 2025 el agua se pregunta en dos pasos.</li>
         <li>Electricidad: 2007 y 2017 preguntaron si la vivienda tenía alumbrado eléctrico por red pública; 2025 pregunta de dónde proviene principalmente la energía eléctrica. Por eso la luz y los tres servicios juntos se comparan con 2025 con cautela (≈).</li>
       </ul>
@@ -317,7 +319,6 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       <h2>Lo que no se compara</h2>
       <ul>
         <li>Discapacidad, autoidentificación étnica y tenencia de la vivienda: las preguntas cambiaron entre censos.</li>
-        <li>Internet entre 2017 y 2025: en 2017 no se separó internet fijo y móvil.</li>
         <li>Castellano como lengua materna frente a 2025: en 2025 se puede declarar más de una lengua materna.</li>
         <li>Empleo: el Censo 2025 no lo preguntó. Para 2007 y 2017 se usa el conteo directo; en 2017 el INEI publicó una PEA mayor, estimada con modelos.</li>
       </ul>
@@ -500,7 +501,26 @@ function renderSummary(){
     lead = "De " + LEV[S.lev].art + " " + list.all.length + " " + LEV[S.lev].pl + " " + scopeLabel() + ", " + up + " " + w[0] + " y " + dn + " " + w[1] + "." + (list.out ? " " + list.out + " no se pueden comparar." : "");
   }
   $("s-lead").textContent = lead;
+  var g = gapText(m, su, ch); $("s-gap").textContent = g; $("s-gap").hidden = !g;
   $("vis").hidden = !ok; if (!ok) { $("fullsec").hidden = true; }
+}
+
+/* "Aún hay X ... Al ritmo de A–B, se tardaría unos N años en cerrar la brecha." */
+function fBig(x){ if (x >= 1e6) { var t = (Math.round(x / 1e5) / 10).toString(); return (t === "1" ? "1 millón de" : t + " millones de"); } return nf.format(x); }
+function gapText(m, su, ch){
+  if (!m.gap || !m.dir || m.unit !== "pct") return "";
+  var y = pyears(S.pair), i1 = ix(y[1]), v = vals(su.lev, su.k, m.id), c = cnts(su.lev, su.k, m.id), T = vals(su.lev, su.k, m.dk)[i1];
+  if (v[i1] == null || c[i1] == null || T == null) return "";
+  var miss = m.dir > 0 ? T - c[i1] : c[i1];
+  if (miss <= 0) return "";
+  var custom = BASE[m.id] && !isDef(m.id);
+  var t = "En " + y[1] + ", " + fBig(miss) + " " + m.cu + " " + (custom ? "no entraban en tu selección" : m.gap) + " en " + (su.lev === "R" && su.k === 0 ? "el país" : su.short) + ".";
+  if (ch.d == null) return t;
+  var left = m.dir > 0 ? 100 - ch.b : ch.b, rate = (m.dir > 0 ? ch.b - ch.a : ch.a - ch.b) / (y[1] - y[0]);
+  if (rate <= 0) return t + " Entre " + y[0] + " y " + y[1] + " la brecha no se redujo.";
+  var n = left / rate;
+  var yrs = n < 1 ? "menos de un año" : n > 100 ? "más de un siglo" : "unos " + (n >= 15 ? Math.round(n / 5) * 5 : Math.round(n)) + (Math.round(n) === 1 ? " año" : " años");
+  return t + " Al ritmo de " + y[0] + "–" + y[1] + ", se tardaría " + yrs + " en cerrar la brecha.";
 }
 
 /* ---------- ranking ---------- */
