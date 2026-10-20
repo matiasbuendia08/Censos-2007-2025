@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<script>/* tema elegido antes de pintar, para que no parpadee */ try{ var t = localStorage.getItem("tema"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); }catch(e){}</script>
 <style>
 /* Publicación estadística sobria: columnas a 1200px, reglas finas, una serif para títulos y cifras, sans para datos. */
 :root{
@@ -55,6 +56,25 @@ h1,h2,h3{text-wrap:balance}
 .nav{display:flex;flex-wrap:wrap;gap:4px 24px}
 .nav button{background:none;border:0;border-bottom:2px solid transparent;padding:6px 0;color:var(--accent);font-size:14px}
 .nav button[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
+.navbox{display:flex;align-items:center;gap:12px 24px}
+.theme{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);padding:6px 10px;min-height:36px;color:var(--ink2);font-size:13px;flex:none}
+.theme:hover{border-color:var(--accent);color:var(--accent)}
+.theme svg{width:16px;height:16px;flex:none}
+.theme .i-sun{display:none}
+:root[data-theme="dark"] .theme .i-sun{display:block} :root[data-theme="dark"] .theme .i-moon{display:none}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .theme .i-sun{display:block} :root:not([data-theme="light"]) .theme .i-moon{display:none} }
+/* celular: título y botón de tema arriba, secciones abajo a todo el ancho */
+@media (max-width:719px){
+  .top .wrap{padding-block:12px 0;gap:10px 12px}
+  .brand{flex:1 1 0;min-width:0}
+  .brand b{font-size:20px}
+  .navbox{display:contents}
+  .theme{order:1}
+  .nav{order:2;flex-basis:100%;flex-wrap:nowrap;gap:20px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{white-space:nowrap;padding:8px 0 10px}
+  .theme .tx{display:none}
+}
 
 /* intro y controles */
 .intro{padding-block:36px 24px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:10px}
@@ -200,7 +220,35 @@ table.f td:first-child{min-width:240px}
 footer{border-top:1px solid var(--rule);margin-top:40px}
 footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);line-height:1.5}
 .loading{padding-block:80px;text-align:center;color:var(--muted)}
-@media (max-width:560px){ .rk{grid-template-columns:minmax(0,1fr) 76px} .rk .db{display:none} .legend{grid-template-columns:repeat(5,minmax(0,1fr))} .legend .na{grid-column:1/-1;grid-row:auto;padding-left:0} }
+@media (max-width:560px){ .rk{grid-template-columns:minmax(0,1fr) 76px} .rk .db{display:none} .legend{grid-template-columns:repeat(5,minmax(0,1fr))} .legend .na{grid-column:1/-1;grid-row:auto;padding-left:0;order:1;margin-top:4px} }
+/* celular: botones de periodo y nivel en una sola fila a todo el ancho, tablas sin cortes */
+@media (max-width:560px){
+  .row > .field{flex:1 1 100%}
+  .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+  .seg button{padding:10px 4px;font-size:13px;white-space:nowrap}
+  .intro{padding-block:24px 18px}
+  .intro p{font-size:16px}
+  .summary h2,.result h2{font-size:23px}
+  table.mini td,table.mini th{padding-inline:5px}
+  table.mini td:not(:first-child){white-space:nowrap}
+  table.mini td:first-child{max-width:none}
+  .cmpbox{padding:14px 16px}
+  .pairs li{grid-template-columns:1fr;gap:2px}
+  .callout{padding:14px 16px;gap:12px}
+  .callout .big{font-size:32px}
+  .fhead .row > .field.search{flex:1 1 100%!important}
+  /* ficha: cada indicador en dos líneas (nombre arriba; 2007, 2017, 2025 y cambio abajo) en vez de deslizar de lado */
+  table.t.f{min-width:0}
+  table.f tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:6px;padding:8px 0;border-bottom:1px solid var(--rule2)}
+  table.f thead tr{border-bottom:1px solid var(--ink);padding-top:0}
+  table.f th,table.f td{border:0;padding:1px 0!important;text-align:right!important;white-space:normal}
+  table.f th:first-child,table.f th:nth-child(n+6){display:none}
+  table.f td:first-child{grid-column:1/-1;min-width:0;text-align:left!important;padding-bottom:4px!important}
+  table.f td:nth-child(n+6){grid-column:1/-1;text-align:left!important}
+  table.f td:nth-child(n+6):empty{display:none}
+  table.f .pc{font-size:13px}
+  table.f td:nth-child(5){font-size:13px!important}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -211,13 +259,31 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#" id="home"><b>Perú en tres censos</b><span>Comparador de los Censos Nacionales 2007, 2017 y 2025</span></a>
+    <div class="navbox">
     <nav class="nav" aria-label="Secciones">
       <button data-view="comparador" aria-current="page">Comparador</button>
       <button data-view="ficha">Ficha por territorio</button>
       <button data-view="metodo">Metodología</button>
     </nav>
+    <button class="theme" id="theme" type="button" aria-label="Cambiar a modo oscuro">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <span class="tx">Modo oscuro</span>
+    </button>
+    </div>
   </div>
 </header>
+<script>
+(function(){
+  // Botón de tema: alterna entre claro y oscuro y lo recuerda; sin elección, sigue al sistema.
+  var root = document.documentElement, btn = document.getElementById("theme"), mq = window.matchMedia("(prefers-color-scheme: dark)");
+  function dark(){ var t = root.getAttribute("data-theme"); return t ? t === "dark" : mq.matches; }
+  function label(){ var d = dark(); btn.querySelector(".tx").textContent = d ? "Modo claro" : "Modo oscuro"; btn.setAttribute("aria-label", d ? "Cambiar a modo claro" : "Cambiar a modo oscuro"); }
+  btn.addEventListener("click", function(){ var t = dark() ? "light" : "dark"; root.setAttribute("data-theme", t); try{ localStorage.setItem("tema", t); }catch(e){} label(); });
+  if (mq.addEventListener) mq.addEventListener("change", label);
+  label();
+})();
+</script>
 
 <main>
   <div id="loading" class="wrap loading">Cargando los datos de los tres censos…</div>
@@ -332,7 +398,6 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       <ul>
         <li>Discapacidad, autoidentificación étnica y tenencia de la vivienda: las preguntas cambiaron entre censos.</li>
         <li>Castellano como lengua materna frente a 2025: en 2025 se puede declarar más de una lengua materna.</li>
-        <li>Empleo: el Censo 2025 no lo preguntó. Para 2007 y 2017 se usa el conteo directo; en 2017 el INEI publicó una PEA mayor, estimada con modelos.</li>
       </ul>
       <h2>Mapa</h2>
       <p>El mapa usa los límites distritales censales del INEI con la división de 2017 (1,874 distritos; versión simplificada publicada en josedaniel-cb/limites-peru-geojson, licencia MIT). Las provincias y las regiones se arman uniendo esos distritos, así que Putumayo y sus cuatro distritos tienen polígono propio. Los 19 distritos creados entre 2017 y 2025 no lo tienen: su territorio se ve dentro del distrito del que salieron. Es una aproximación visual; las cifras de las tablas usan siempre los territorios de 2025.</p>

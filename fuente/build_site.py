@@ -32,7 +32,6 @@ CATS = [
  ("Educación", ["ANALF15", "NOA611", "NOA1216", "ASISTE", "SUPER"]),
  ("Salud e identidad", ["SINSEG", "SIS", "ESSALUD", "SINDNI"]),
  ("Lengua materna", ["LM_QUE", "LM_CAST"]),
- ("Empleo (2007–2017)", ["PEA14", "DES14"]),
 ]
 # etiqueta, título largo (para frases), dirección (+1 subir es mejora, -1 bajar es mejora, 0 neutro)
 L = {
@@ -75,8 +74,6 @@ L = {
  "SINDNI": ("Sin ningún documento de identidad", "el porcentaje de personas sin ningún documento de identidad", -1),
  "LM_QUE": ("Lengua materna quechua", "el porcentaje de personas con quechua como lengua materna", 0),
  "LM_CAST": ("Lengua materna castellano", "el porcentaje de personas con castellano como lengua materna", 0),
- "PEA14": ("Tasa de actividad (14 años a más)", "la tasa de actividad de la población de 14 años a más", 0),
- "DES14": ("Tasa de desempleo (14 años a más)", "la tasa de desempleo", -1),
 }
 CU = {"viviendas particulares con ocupantes presentes": "viviendas", "viviendas con agua por red pública o pilón": "viviendas",
       "hogares": "hogares", "mujeres de 12 años a más": "mujeres"}
@@ -93,7 +90,6 @@ def clean(t):
 SIM07 = "Similar: en 2007 no existía la opción triplay/calamina."
 COC07 = "No comparable: en 2007 se preguntó solo por la energía principal para cocinar; desde 2017, por todas las que usa el hogar."
 LM2 = "No comparable: en 2025 se puede declarar más de una lengua materna y el castellano sube por las respuestas múltiples."
-EMP = "No existe en 2025: el censo no preguntó por empleo."
 NOTES = {
  "PARADE": {"2007-2017": "Misma definición: los materiales adecuados (ladrillo o bloque, piedra o sillar con cal o cemento) son opciones en los tres censos.", "2017-2025": "Misma definición. En 2025 el drywall, que aparece como opción aparte, cuenta como adecuado (0.2% de las viviendas).", "2007-2025": "Misma definición. En 2025 el drywall, que aparece como opción aparte, cuenta como adecuado (0.2% de las viviendas)."},
  "TECADE": {"2007-2017": "No existe en 2007: ese censo no preguntó el material del techo.", "2007-2025": "No existe en 2007: ese censo no preguntó el material del techo.", "2017-2025": "Misma definición."},
@@ -113,15 +109,11 @@ NOTES = {
  "SINDNI": {"2007-2017": "No comparable: en 2007 solo se preguntó por el DNI a mayores de 18 años, sin preguntar por otros documentos.", "2007-2025": "No comparable: en 2007 solo se preguntó por el DNI a mayores de 18 años, sin preguntar por otros documentos.", "2017-2025": "Misma definición. En 2025 se agrega el permiso temporal de permanencia, que tienen solo extranjeros."},
  "LM_QUE": {"2017-2025": "Misma definición, pero en 2025 se puede declarar más de una lengua materna.", "2007-2025": "Misma definición, pero en 2025 se puede declarar más de una lengua materna."},
  "LM_CAST": {"2017-2025": LM2, "2007-2025": LM2},
- "PEA14": {"2017-2025": EMP, "2007-2025": EMP},
- "DES14": {"2017-2025": EMP, "2007-2025": EMP},
  "URB": {"2017-2025": "Misma definición.", "2007-2025": "Misma definición."},
 }
 EXTRA = {
  "POB": "Población censada, sin la estimación de población omitida. La población total oficial fue 28,220,764 (2007), 31,237,385 (2017) y 34,157,732 (2025).",
  "NACEXT": "En 2007 y 2017 el lugar de nacimiento es donde vivía la madre al nacer; en 2025 se pregunta si nació en otro país.",
- "PEA14": "Conteo directo de los microdatos. En 2017 el INEI publicó una PEA mayor, estimada con modelos (16.5 millones frente a 13.0 millones aquí).",
- "DES14": "Conteo directo de los microdatos. En 2017 el INEI publicó una PEA mayor, estimada con modelos.",
 }
 CMP = {"INTFIJ": {"2007-2017": True, "2017-2025": True, "2007-2025": True}}
 def note_for(i, p, m):
@@ -150,8 +142,7 @@ DEF = {
  "ASISTE": "Personas de 3 años a más que asisten a un colegio, instituto o universidad", "SUPER": "Personas de 3 años a más con educación superior, completa o incompleta",
  "SINSEG": "Personas sin ningún seguro de salud", "SIS": "Personas afiliadas al Seguro Integral de Salud", "ESSALUD": "Personas afiliadas a EsSalud",
  "SINDNI": "Personas que no tienen DNI ni ningún otro documento (partida de nacimiento, carné de extranjería o permiso temporal). No cuenta a los extranjeros, que no pueden tener DNI, ni a quienes respondieron que no recuerdan o no saben qué documento tienen (2.7 millones en 2025), una respuesta ambigua", "LM_QUE": "Personas de 3 años a más cuya lengua materna es el quechua",
- "LM_CAST": "Personas de 3 años a más cuya lengua materna es el castellano", "PEA14": "Población económicamente activa como porcentaje de la población de 14 años a más",
- "DES14": "Desocupados como porcentaje de la población económicamente activa de 14 años a más",
+ "LM_CAST": "Personas de 3 años a más cuya lengua materna es el castellano",
 }
 # Frase de "lo que falta": (texto, id del total). Solo indicadores con meta clara y total en la página.
 GAP = {
