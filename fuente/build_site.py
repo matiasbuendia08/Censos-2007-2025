@@ -23,13 +23,36 @@ for blk, nk in (("regions", "n"), ("provs", "n_"), ("dists", "n_")):
 for new, old in REV.items():
     M0[new] = dict(M0[old], id=new)
 
+# Educación (edu.json, de build_edu.py): no asisten de 6 a 16 años = 6-11 + 12-16, con el lector eligiendo las edades
+# (bloque K, cada edad con su propio denominador). Los totales por edad van como series ocultas para las brechas.
+E = json.load(open(HERE + "/edu.json", encoding="utf-8"))
+def add3(a, b): return [None if (x is None or y is None) else x + y for x, y in zip(a, b)]
+HID = ["P15", "P611", "P1216", "P616"]
+for blk, nk, lev in (("regions", "n", "R"), ("provs", "n_", "P"), ("dists", "n_", "D")):
+    B, e = D0[blk], E[lev]
+    e["P616"] = [add3(a, b) for a, b in zip(e["P611"], e["P1216"])]
+    num = [add3(a, b) for a, b in zip(e["NOA611"], e["NOA1216"])]
+    B[nk]["NOA616"] = num
+    B["v"]["NOA616"] = [[None if (x is None or not t) else round(100 * x / t, 1) for x, t in zip(n, d)] for n, d in zip(num, e["P616"])]
+    for h in HID: B["v"][h] = e[h]; B[nk][h] = e[h]
+M0["NOA616"] = dict(M0["NOA611"], id="NOA616", den="población de 6 a 16 años")
+AGES = [("611", "NOA611", "P611", "6 a 11 años", "niños", "niños de 6 a 11 años"),
+        ("1216", "NOA1216", "P1216", "12 a 16 años", "adolescentes", "adolescentes de 12 a 16 años")]
+K_EDU = {"NOA616": dict(
+    cats=[dict(id=c, label=lab, note="", years=[2007, 2017, 2025], den=d, cu=cu,
+               lab=f"No asisten a la escuela ({lab})", long=f"el porcentaje de {who} que no asiste a la escuela",
+               dentxt=f"población de {lab}", def_=f"{who[0].upper() + who[1:]} que no asisten a un centro educativo")
+          for c, _, d, lab, cu, who in AGES],
+    **{"def": ["611", "1216"], "den": "P616", "byage": True},
+    **{lev: {c: E[lev][i] for c, i, *_ in AGES} for lev in ("R", "P", "D")})}
+
 CATS = [
  ("Población y hogares", ["POB", "HOG", "URB", "MEN15", "MAY65", "JEFAM", "MIGR5", "NACEXT"]),
  ("Vivienda", ["VOP", "PARADE", "TECADE", "PISADE", "HACINA", "HAB1"]),
  ("Infraestructura y servicios básicos", ["SB3RP", "AGUARP", "DESRP", "ELECRP"]),
  ("Conectividad y bienes", ["CELUL", "INTFIJ", "PCLAP", "REFRI", "AUTO", "MOTO"]),
  ("Energía para cocinar", ["COMBCON", "LENA", "GLP"]),
- ("Educación", ["ANALF15", "NOA611", "NOA1216", "ASISTE", "SUPER"]),
+ ("Educación", ["ANALF15", "NOA616", "ASISTE", "SUPER"]),
  ("Salud e identidad", ["SINSEG", "SIS", "ESSALUD", "SINDNI"]),
  ("Lengua materna", ["LM_QUE", "LM_CAST"]),
 ]
@@ -64,8 +87,7 @@ L = {
  "LENA": ("Cocinan con leña", "el porcentaje de hogares que cocinan con leña", -1),
  "GLP": ("Cocinan con gas (balón)", "el porcentaje de hogares que cocinan con gas de balón", 1),
  "ANALF15": ("Analfabetismo (15 años a más)", "la tasa de analfabetismo de la población de 15 años a más", -1),
- "NOA611": ("No asisten a la escuela (6 a 11 años)", "el porcentaje de niños de 6 a 11 años que no asiste a la escuela", -1),
- "NOA1216": ("No asisten a la escuela (12 a 16 años)", "el porcentaje de adolescentes de 12 a 16 años que no asiste a la escuela", -1),
+ "NOA616": ("No asisten a la escuela (6 a 16 años)", "el porcentaje de niños y adolescentes de 6 a 16 años que no asiste a la escuela", -1),
  "ASISTE": ("Asiste a un centro educativo (3 años a más)", "el porcentaje de personas de 3 años a más que asiste a un centro educativo", 0),
  "SUPER": ("Con educación superior (3 años a más)", "el porcentaje de personas con educación superior", 1),
  "SINSEG": ("Sin seguro de salud", "el porcentaje de personas sin seguro de salud", -1),
@@ -76,7 +98,7 @@ L = {
  "LM_CAST": ("Lengua materna castellano", "el porcentaje de personas con castellano como lengua materna", 0),
 }
 CU = {"viviendas particulares con ocupantes presentes": "viviendas", "viviendas con agua por red pública o pilón": "viviendas",
-      "hogares": "hogares", "mujeres de 12 años a más": "mujeres"}
+      "hogares": "hogares", "mujeres de 12 años a más": "mujeres", "población de 6 a 16 años": "niños y adolescentes"}
 COUNT_UNIT = {"POB": "personas", "HOG": "hogares", "VOP": "viviendas"}
 IDS = [i for _, l in CATS for i in l]
 
@@ -138,7 +160,7 @@ DEF = {
  "PCLAP": "Hogares con computadora, laptop o tablet", "REFRI": "Hogares con refrigeradora o congeladora", "AUTO": "Hogares con automóvil o camioneta",
  "MOTO": "Hogares con motocicleta", "COMBCON": "Hogares que cocinan solo con leña, carbón, bosta u otro combustible contaminante, sin gas ni electricidad",
  "LENA": "Hogares que cocinan con leña", "GLP": "Hogares que cocinan con gas de balón", "ANALF15": "Personas de 15 años a más que no saben leer ni escribir",
- "NOA611": "Niños de 6 a 11 años que no asisten a un centro educativo", "NOA1216": "Adolescentes de 12 a 16 años que no asisten a un centro educativo",
+ "NOA616": "Niños y adolescentes de 6 a 16 años que no asisten a un centro educativo. Se pueden ver por separado los de 6 a 11 años (edad de primaria) y los de 12 a 16 años (edad de secundaria)",
  "ASISTE": "Personas de 3 años a más que asisten a un colegio, instituto o universidad", "SUPER": "Personas de 3 años a más con educación superior, completa o incompleta",
  "SINSEG": "Personas sin ningún seguro de salud", "SIS": "Personas afiliadas al Seguro Integral de Salud", "ESSALUD": "Personas afiliadas a EsSalud",
  "SINDNI": "Personas que no tienen DNI ni ningún otro documento (partida de nacimiento, carné de extranjería o permiso temporal). No cuenta a los extranjeros, que no pueden tener DNI, ni a quienes respondieron que no recuerdan o no saben qué documento tienen (2.7 millones en 2025), una respuesta ambigua", "LM_QUE": "Personas de 3 años a más cuya lengua materna es el quechua",
@@ -152,6 +174,7 @@ GAP = {
  "CELUL": ("aún no tenían celular", "HOG"), "INTFIJ": ("aún no tenían internet", "HOG"), "PCLAP": ("aún no tenían computadora, laptop ni tablet", "HOG"),
  "REFRI": ("aún no tenían refrigeradora", "HOG"), "COMBCON": ("aún cocinaban solo con combustibles contaminantes", "HOG"), "LENA": ("aún cocinaban con leña", "HOG"),
  "SINSEG": ("aún no tenían seguro de salud", "POB"), "SINDNI": ("aún no tenían ningún documento de identidad", "POB"),
+ "ANALF15": ("aún no sabían leer ni escribir", "P15"), "NOA616": ("aún no asistían a la escuela", "P616"),
 }
 meta = []
 for cat, ids in CATS:
@@ -164,7 +187,7 @@ for cat, ids in CATS:
                          extra=EXTRA.get(i, ""), **({"gap": GAP[i][0], "dk": GAP[i][1]} if i in GAP else {})))
 
 def pick(block, key, idx=None):
-    return {i: block[key][i] for i in IDS}
+    return {i: block[key][i] for i in IDS + HID}
 
 R = D0["regions"]; P = D0["provs"]; DI = D0["dists"]
 def norm(s): return re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFKD", str(s)).encode("ascii", "ignore").decode().lower())
@@ -235,6 +258,7 @@ data = dict(
            comp=comp, why=why,
            v=pick(DI, "v"), c=pick(DI, "n_")),
     alerts={p: D0["alert_summary"][p] for p in PAIRS},
+    K=K_EDU,
 )
 s = json.dumps(data, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
 open(OUT + "censos.json", "w", encoding="utf-8").write(s); print("censos.json", round(len(s) / 1e6, 2), "MB")

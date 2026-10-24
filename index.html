@@ -460,28 +460,39 @@ function score(m, d){ return d == null ? null : d * (m.dir || 1); }
 function cls(m, d){ if (d == null || d === 0) return "nu"; var s = score(m, d); return s > 0 ? "up" : "dn"; }
 
 /* ---------- indicadores con categorías a elegir (paredes, techos, pisos, agua, desagüe) ---------- */
-var FAMNAME = {PARADE: ["Paredes", "Viviendas con paredes de", "adecuado"], TECADE: ["Techos", "Viviendas con techo de", "adecuado"], PISADE: ["Pisos", "Viviendas con piso de", "adecuado"], AGUARP: ["Agua", "Viviendas con agua de", "acceso"], DESRP: ["Desagüe", "Viviendas con servicio higiénico conectado a", "acceso"], SINDNI: ["Documento de identidad", "Personas que respondieron", ""]};
+var FAMNAME = {PARADE: ["Paredes", "Viviendas con paredes de", "adecuado"], TECADE: ["Techos", "Viviendas con techo de", "adecuado"], PISADE: ["Pisos", "Viviendas con piso de", "adecuado"], AGUARP: ["Agua", "Viviendas con agua de", "acceso"], DESRP: ["Desagüe", "Viviendas con servicio higiénico conectado a", "acceso"], SINDNI: ["Documento de identidad", "Personas que respondieron", ""], NOA616: ["No asisten a la escuela", "", ""]};
 var SEL = {}, BASE = {};
 function initSel(){
   Object.keys(D.K || {}).forEach(function(f){
-    var m = M[f]; if (!m) return;
-    SEL[f] = D.K[f].def.slice();
-    BASE[f] = {label: m.label, def_: m.def_, long: m.long, R: [D.R.v[f], D.R.n[f]], P: [D.P.v[f], D.P.c[f]], D: [D.D.v[f], D.D.c[f]]};
+    var m = M[f], K = D.K[f]; if (!m) return;
+    SEL[f] = K.def.slice();
+    BASE[f] = {label: m.label, def_: m.def_, long: m.long, den: m.den, cu: m.cu};
+    ["R", "P", "D"].forEach(function(lev){ var b = blk(lev); BASE[f][lev] = [b.v[f], b[lev === "R" ? "n" : "c"][f], b.v[K.den || "VOP"]]; });
   });
 }
 function isDef(f){ var d = D.K[f].def, s = SEL[f]; return s.length === d.length && d.every(function(i){ return s.indexOf(i) >= 0; }); }
+/* byage (educación): cada opción es una edad con su propio denominador, así que se suman numeradores y denominadores */
+function catById(K, id){ return K.cats.filter(function(c){ return c.id === id; })[0]; }
 function applySel(f){
   var K = D.K[f], s = SEL[f], m = M[f], B = BASE[f], dflt = isDef(f);
+  var sum = function(rows){ return function(_, k){ return [0, 1, 2].map(function(j){ var t = 0; for (var q = 0; q < s.length; q++){ var x = rows(s[q])[k][j]; if (x == null) return null; t += x; } return t; }); }; };
   ["R", "P", "D"].forEach(function(lev){
     var b = blk(lev), nk = lev === "R" ? "n" : "c";
-    if (dflt) { b.v[f] = B[lev][0]; b[nk][f] = B[lev][1]; return; }   // valores originales, sin recalcular
-    var vop = b.v[K.den || "VOP"];
-    var n = vop.map(function(_, k){ return [0, 1, 2].map(function(j){ var t = 0; for (var q = 0; q < s.length; q++){ var x = K[lev][s[q]][k][j]; if (x == null) return null; t += x; } return t; }); });
+    if (dflt) { b.v[f] = B[lev][0]; b[nk][f] = B[lev][1]; b.v[K.den || "VOP"] = B[lev][2]; return; }   // valores originales, sin recalcular
+    var vop = B[lev][2];
+    if (K.byage) { vop = vop.map(sum(function(id){ return b.v[catById(K, id).den]; })); b.v[K.den] = vop; }   // el total de la brecha sigue a la selección
+    var n = vop.map(sum(function(id){ return K[lev][id]; }));
     b[nk][f] = n;
     b.v[f] = n.map(function(r, k){ return r.map(function(x, j){ var t = vop[k][j]; return x == null || !t ? null : Math.round(1000 * x / t) / 10; }); });
   });
-  if (dflt) { m.label = B.label; m.def_ = B.def_; m.long = B.long; m.selnote = ""; return; }
+  if (dflt) { m.label = B.label; m.def_ = B.def_; m.long = B.long; m.den = B.den; m.cu = B.cu; m.selnote = ""; return; }
   var picked = K.cats.filter(function(c){ return s.indexOf(c.id) >= 0; });
+  if (K.byage) {
+    var c1 = picked[0];
+    m.label = c1 ? c1.lab : FAMNAME[f][0] + ": ninguna edad elegida";
+    m.long = c1 ? c1.long : B.long; m.def_ = c1 ? c1.def_ : "Ninguna edad elegida"; m.den = c1 ? c1.dentxt : B.den; m.cu = c1 ? c1.cu : B.cu; m.selnote = "";
+    return;
+  }
   m.label = FAMNAME[f][0] + ": tu selección";
   m.long = "el porcentaje que entra en tu selección";
   m.def_ = FAMNAME[f][1] + ": " + (picked.length ? picked.map(function(c){ return c.label.charAt(0).toLowerCase() + c.label.slice(1); }).join("; ") : "ninguna opción elegida") + ". Es una selección propia, distinta de la definición recomendada";
@@ -491,19 +502,21 @@ function applySel(f){
 function renderOpts(){
   var box = $("opts"), f = S.ind, K = D.K && D.K[f];
   clear(box); box.hidden = !K; if (!K) return;
-  var dflt = isDef(f);
-  box.appendChild(el("legend", {cls: "sr", text: "Qué se cuenta"}));
-  box.appendChild(el("div", {cls: "hd"}, [el("b", {text: FAMNAME[f][2] ? "Qué se cuenta como " + FAMNAME[f][2] : "Qué se cuenta"}), el("span", {text: "Marca o desmarca opciones: el mapa, las listas y las tablas se recalculan."})]));
+  var dflt = isDef(f), age = K.byage;
+  box.appendChild(el("legend", {cls: "sr", text: age ? "Qué edades se incluyen" : "Qué se cuenta"}));
+  box.appendChild(el("div", {cls: "hd"}, [el("b", {text: age ? "Qué edades se incluyen" : FAMNAME[f][2] ? "Qué se cuenta como " + FAMNAME[f][2] : "Qué se cuenta"}), el("span", {text: "Marca o desmarca " + (age ? "edades" : "opciones") + ": el mapa, las listas y las tablas se recalculan."})]));
   var ul = el("ul");
   K.cats.forEach(function(c){
     var inp = el("input", {type: "checkbox", value: c.id});
     inp.checked = SEL[f].indexOf(c.id) >= 0;
     inp.addEventListener("change", function(){ var s = SEL[f], i = s.indexOf(c.id); if (inp.checked && i < 0) s.push(c.id); if (!inp.checked && i >= 0) s.splice(i, 1); applySel(f); renderAll(); });
-    var rec = K.def.indexOf(c.id) >= 0 ? el("span", {cls: "rec", text: "Recomendado"}) : null;
+    var rec = !age && K.def.indexOf(c.id) >= 0 ? el("span", {cls: "rec", text: "Recomendado"}) : null;
     ul.appendChild(el("li", {}, [el("label", {}, [inp, el("span", {}, [c.label, rec, c.note ? el("span", {cls: "cn", text: c.note}) : null])])]));
   });
   box.appendChild(ul);
-  var ft = el("div", {cls: "ft"}, [dflt ? "Estás viendo la definición recomendada." : "Estás viendo tu propia selección.", dflt ? null : el("button", {cls: "linkbtn", text: "Volver a la recomendada", onclick: function(){ SEL[f] = K.def.slice(); applySel(f); renderAll(); }})]);
+  var msg = age ? (dflt ? "Estás viendo las dos edades juntas (6 a 16 años)." : SEL[f].length ? "Estás viendo solo una edad." : "No elegiste ninguna edad.")
+                : (dflt ? "Estás viendo la definición recomendada." : "Estás viendo tu propia selección.");
+  var ft = el("div", {cls: "ft"}, [msg, dflt ? null : el("button", {cls: "linkbtn", text: age ? "Volver a 6 a 16 años" : "Volver a la recomendada", onclick: function(){ SEL[f] = K.def.slice(); applySel(f); renderAll(); }})]);
   box.appendChild(ft);
 }
 
@@ -590,7 +603,7 @@ function gapText(m, su, ch){
   if (v[i1] == null || c[i1] == null || T == null) return "";
   var miss = m.dir > 0 ? T - c[i1] : c[i1];
   if (miss <= 0) return "";
-  var custom = BASE[m.id] && !isDef(m.id);
+  var custom = BASE[m.id] && !isDef(m.id) && !D.K[m.id].byage;   // elegir edades no cambia qué se cuenta
   var t = "En " + y[1] + ", " + fBig(miss) + " " + m.cu + " " + (custom ? (m.dir > 0 ? "no entraban en tu selección" : "estaban en tu selección") : m.gap) + " en " + (su.lev === "R" && su.k === 0 ? "el país" : su.short) + ".";
   if (ch.d == null) return t;
   var T0 = vals(su.lev, su.k, m.dk)[ix(y[0])], ea = ch.na != null && T0 ? 100 * ch.na / T0 : ch.a, eb = 100 * c[i1] / T;   // con conteos exactos, no con % redondeados
