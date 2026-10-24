@@ -1,14 +1,14 @@
 # Perú en tres censos
 
-Comparador de los Censos Nacionales 2007, 2017 y 2025 del INEI: 37 indicadores de población, vivienda, servicios, hogar, educación, salud y lengua, por región, provincia y distrito.
+Comparador de los Censos Nacionales 2007, 2017 y 2025 del INEI: 36 indicadores de población, vivienda, servicios, hogar, educación, salud y lengua, por región, provincia y distrito.
 
 Página: https://matiasbuendia08.github.io/Censos-2007-2025/
 
 ## Qué muestra
 
 - **Comparador:** elige tema, indicador, periodo (2007→2017, 2017→2025 o 2007→2025) y nivel. Un mapa pinta el cambio y dos tablas muestran los cinco territorios que más mejoraron y los cinco que más retrocedieron.
-- **Ficha por territorio:** los 37 indicadores de cualquier región, provincia o distrito, con porcentaje, número y nota de comparabilidad.
-- **Elige qué cuenta:** en paredes, techos, pisos, agua y desagüe puedes marcar qué materiales o fuentes cuentan; por defecto se usa la definición recomendada (material adecuado o red pública). En no asistencia escolar puedes ver de 6 a 16 años juntos o solo 6 a 11 o 12 a 16 años.
+- **Ficha por territorio:** los 36 indicadores de cualquier región, provincia o distrito, con porcentaje, número y nota de comparabilidad.
+- **Elige qué cuenta:** en paredes, techos, pisos, agua y desagüe puedes marcar qué materiales o fuentes cuentan; por defecto se usa la definición recomendada (material adecuado o red pública). En no asistencia escolar puedes ver de 6 a 16 años juntos o solo 6 a 11 o 12 a 16 años, y en nivel educativo (población de 15 años a más, como lo publica el INEI) puedes elegir qué niveles contar.
 - **Metodología:** universos, geografía y qué no se compara entre censos.
 
 ## Datos

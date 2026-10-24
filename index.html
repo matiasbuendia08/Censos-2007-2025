@@ -460,7 +460,7 @@ function score(m, d){ return d == null ? null : d * (m.dir || 1); }
 function cls(m, d){ if (d == null || d === 0) return "nu"; var s = score(m, d); return s > 0 ? "up" : "dn"; }
 
 /* ---------- indicadores con categorías a elegir (paredes, techos, pisos, agua, desagüe) ---------- */
-var FAMNAME = {PARADE: ["Paredes", "Viviendas con paredes de", "adecuado"], TECADE: ["Techos", "Viviendas con techo de", "adecuado"], PISADE: ["Pisos", "Viviendas con piso de", "adecuado"], AGUARP: ["Agua", "Viviendas con agua de", "acceso"], DESRP: ["Desagüe", "Viviendas con servicio higiénico conectado a", "acceso"], SINDNI: ["Documento de identidad", "Personas que respondieron", ""], NOA616: ["No asisten a la escuela", "", ""]};
+var FAMNAME = {PARADE: ["Paredes", "Viviendas con paredes de", "adecuado"], TECADE: ["Techos", "Viviendas con techo de", "adecuado"], PISADE: ["Pisos", "Viviendas con piso de", "adecuado"], AGUARP: ["Agua", "Viviendas con agua de", "acceso"], DESRP: ["Desagüe", "Viviendas con servicio higiénico conectado a", "acceso"], SINDNI: ["Documento de identidad", "Personas que respondieron", ""], NOA616: ["No asisten a la escuela", "", ""], SUP15: ["Nivel educativo", "Personas de 15 años a más cuyo último nivel aprobado es", ""]};
 var SEL = {}, BASE = {};
 function initSel(){
   Object.keys(D.K || {}).forEach(function(f){

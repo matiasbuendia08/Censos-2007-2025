@@ -45,6 +45,23 @@ K_EDU = {"NOA616": dict(
           for c, _, d, lab, cu, who in AGES],
     **{"def": ["611", "1216"], "den": "P616", "byage": True},
     **{lev: {c: E[lev][i] for c, i, *_ in AGES} for lev in ("R", "P", "D")})}
+# Nivel educativo alcanzado de 15 años a más, como el INEI: por defecto, superior (no universitaria + universitaria);
+# el lector puede marcar cualquier otro nivel.
+NIVS = [("sin", "Sin nivel", ""), ("ini", "Inicial", ""), ("pri", "Primaria", ""),
+        ("bes", "Básica especial", "No existe como opción en 2007."), ("sec", "Secundaria", ""),
+        ("snu", "Superior no universitaria (completa o incompleta)", ""),
+        ("sun", "Superior universitaria, con maestría y doctorado (completa o incompleta)", "En 2007 maestría y doctorado no eran una opción aparte.")]
+SUPD = ["snu", "sun"]
+for blk, nk, lev in (("regions", "n", "R"), ("provs", "n_", "P"), ("dists", "n_", "D")):
+    B, e = D0[blk], E[lev]
+    num = [add3(a, b) for a, b in zip(*(e[c] for c in SUPD))]
+    B[nk]["SUP15"] = num
+    B["v"]["SUP15"] = [[None if (x is None or not t) else round(100 * x / t, 1) for x, t in zip(n, d)] for n, d in zip(num, e["P15"])]
+M0["SUP15"] = dict(M0["SUPER"], id="SUP15", den="población de 15 años a más", years=[2007, 2017, 2025],
+                   cmp={p: True for p in ["2007-2017", "2017-2025", "2007-2025"]})
+K_EDU["SUP15"] = dict(cats=[dict(id=c, label=lab, note=nt, years=[2017, 2025] if c == "bes" else [2007, 2017, 2025]) for c, lab, nt in NIVS],
+                      **{"def": SUPD, "den": "P15"},
+                      **{lev: {c: [[None] + r[1:] for r in E[lev][c]] if c == "bes" else E[lev][c] for c, *_ in NIVS} for lev in ("R", "P", "D")})   # básica especial no existe en 2007
 
 CATS = [
  ("Población y hogares", ["POB", "HOG", "URB", "MEN15", "MAY65", "JEFAM", "MIGR5", "NACEXT"]),
@@ -52,7 +69,7 @@ CATS = [
  ("Infraestructura y servicios básicos", ["SB3RP", "AGUARP", "DESRP", "ELECRP"]),
  ("Conectividad y bienes", ["CELUL", "INTFIJ", "PCLAP", "REFRI", "AUTO", "MOTO"]),
  ("Energía para cocinar", ["COMBCON", "LENA", "GLP"]),
- ("Educación", ["ANALF15", "NOA616", "ASISTE", "SUPER"]),
+ ("Educación", ["ANALF15", "NOA616", "SUP15"]),
  ("Salud e identidad", ["SINSEG", "SIS", "ESSALUD", "SINDNI"]),
  ("Lengua materna", ["LM_QUE", "LM_CAST"]),
 ]
@@ -88,8 +105,7 @@ L = {
  "GLP": ("Cocinan con gas (balón)", "el porcentaje de hogares que cocinan con gas de balón", 1),
  "ANALF15": ("Analfabetismo (15 años a más)", "la tasa de analfabetismo de la población de 15 años a más", -1),
  "NOA616": ("No asisten a la escuela (6 a 16 años)", "el porcentaje de niños y adolescentes de 6 a 16 años que no asiste a la escuela", -1),
- "ASISTE": ("Asiste a un centro educativo (3 años a más)", "el porcentaje de personas de 3 años a más que asiste a un centro educativo", 0),
- "SUPER": ("Con educación superior (3 años a más)", "el porcentaje de personas con educación superior", 1),
+ "SUP15": ("Con educación superior (15 años a más)", "el porcentaje de personas de 15 años a más con educación superior", 1),
  "SINSEG": ("Sin seguro de salud", "el porcentaje de personas sin seguro de salud", -1),
  "SIS": ("Afiliados al SIS", "el porcentaje de personas afiliadas al SIS", 0),
  "ESSALUD": ("Afiliados a EsSalud", "el porcentaje de personas afiliadas a EsSalud", 0),
@@ -127,7 +143,9 @@ NOTES = {
  "COMBCON": {"2007-2017": COC07, "2007-2025": COC07, "2017-2025": "Misma definición."},
  "LENA": {"2007-2017": COC07, "2007-2025": COC07},
  "GLP": {"2007-2017": COC07, "2007-2025": COC07},
- "SUPER": {"2007-2017": "No comparable: en 2007 los niveles educativos se clasificaban de otra forma.", "2007-2025": "No comparable: en 2007 los niveles educativos se clasificaban de otra forma.", "2017-2025": "Misma definición."},
+ "SUP15": {"2007-2017": "Similar: la misma pregunta (último nivel de estudios aprobado). En 2007 no existía la opción de educación básica especial (0.2% en 2017), y maestría y doctorado no eran una opción aparte. El INEI compara ambos censos en su perfil sociodemográfico 2017.",
+           "2007-2025": "Similar: la misma pregunta (último nivel de estudios aprobado). En 2007 no existía la opción de educación básica especial, y maestría y doctorado no eran una opción aparte.",
+           "2017-2025": "Misma definición. En 2025 maestría y doctorado se separan en incompleto y completo; aquí se suman a universitaria."},
  "SINDNI": {"2007-2017": "No comparable: en 2007 solo se preguntó por el DNI a mayores de 18 años, sin preguntar por otros documentos.", "2007-2025": "No comparable: en 2007 solo se preguntó por el DNI a mayores de 18 años, sin preguntar por otros documentos.", "2017-2025": "Misma definición. En 2025 se agrega el permiso temporal de permanencia, que tienen solo extranjeros."},
  "LM_QUE": {"2017-2025": "Misma definición, pero en 2025 se puede declarar más de una lengua materna.", "2007-2025": "Misma definición, pero en 2025 se puede declarar más de una lengua materna."},
  "LM_CAST": {"2017-2025": LM2, "2007-2025": LM2},
@@ -161,7 +179,7 @@ DEF = {
  "MOTO": "Hogares con motocicleta", "COMBCON": "Hogares que cocinan solo con leña, carbón, bosta u otro combustible contaminante, sin gas ni electricidad",
  "LENA": "Hogares que cocinan con leña", "GLP": "Hogares que cocinan con gas de balón", "ANALF15": "Personas de 15 años a más que no saben leer ni escribir",
  "NOA616": "Niños y adolescentes de 6 a 16 años que no asisten a un centro educativo. Se pueden ver por separado los de 6 a 11 años (edad de primaria) y los de 12 a 16 años (edad de secundaria)",
- "ASISTE": "Personas de 3 años a más que asisten a un colegio, instituto o universidad", "SUPER": "Personas de 3 años a más con educación superior, completa o incompleta",
+ "SUP15": "Personas de 15 años a más cuyo último nivel aprobado es superior no universitaria o universitaria (con maestría y doctorado), completa o incompleta. Es el nivel educativo alcanzado tal como lo publica el INEI; con las casillas se puede ver cualquier otro nivel",
  "SINSEG": "Personas sin ningún seguro de salud", "SIS": "Personas afiliadas al Seguro Integral de Salud", "ESSALUD": "Personas afiliadas a EsSalud",
  "SINDNI": "Personas que no tienen DNI ni ningún otro documento (partida de nacimiento, carné de extranjería o permiso temporal). No cuenta a los extranjeros, que no pueden tener DNI, ni a quienes respondieron que no recuerdan o no saben qué documento tienen (2.7 millones en 2025), una respuesta ambigua", "LM_QUE": "Personas de 3 años a más cuya lengua materna es el quechua",
  "LM_CAST": "Personas de 3 años a más cuya lengua materna es el castellano",
