@@ -117,6 +117,15 @@ select,input[type=search]{border:1px solid var(--line);background:var(--bg);padd
 .tile .sub{font-size:14px;color:var(--ink2)}
 .tile.old .big{color:var(--muted)}
 .lead{margin:0;font-size:15px;line-height:1.6;color:var(--ink2);max-width:72ch}
+.evo{margin:10px 0 0;max-width:640px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--rule);padding-top:16px}
+.evo svg{display:block;overflow:visible;font-family:var(--sans)}
+.evo-leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink2)}
+.evo-leg span{display:flex;align-items:center;gap:6px}
+.evo-leg i{display:inline-block;width:20px;border-top:3px solid var(--accent)}
+.evo-leg i.pe{border-top:2px dashed var(--muted)}
+.credit{display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none}
+.credit:hover{color:var(--ink)}
+.credit svg{flex:none;border-radius:3px}
 .cmpbox{flex:1 1 300px;min-width:0;border:1px solid var(--rule);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
 .pairs{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
 .pairs li{display:grid;grid-template-columns:132px minmax(0,1fr);gap:10px;font-size:13px;line-height:1.45;padding:6px 8px;border-left:2px solid transparent}
@@ -315,6 +324,12 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       <div class="tiles" id="s-tiles"></div>
       <p class="lead" id="s-lead"></p>
       <p class="lead" id="s-gap" hidden></p>
+      <figure class="evo" id="evo" hidden>
+        <figcaption><span class="h3">Evolución en los tres censos</span></figcaption>
+        <svg id="evo-svg" role="img"></svg>
+        <div class="evo-leg" id="evo-leg"></div>
+        <p class="muted small" id="evo-note" hidden></p>
+      </figure>
     </section>
 
     <section class="wrap grid2" id="vis">
@@ -438,7 +453,7 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
   </div>
 </main>
 
-<footer><div class="wrap"><span>Fuente: INEI – Censos Nacionales 2007, 2017 y 2025. Elaboración propia.</span><span>Población y viviendas censadas.</span></div></footer>
+<footer><div class="wrap"><span>Fuente: INEI – Censos Nacionales 2007, 2017 y 2025. Elaboración propia.</span><span>Población y viviendas censadas.</span><a class="credit" href="https://www.linkedin.com/in/matias-alonso-buendia-ugarriza-86992128a/" target="_blank" rel="noopener" aria-label="Elaborado por Matias Buendia (LinkedIn, se abre en otra pestaña)">Elaborado por Matias Buendia <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect width="20" height="20" rx="3" fill="#0A66C2"/><text x="10" y="14.6" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#fff">in</text></svg></a></div></footer>
 
 <script>
 (function(){
@@ -644,6 +659,51 @@ function gapText(m, su, ch){
   var yrs = n < 1 ? "menos de un año" : n > 100 ? "más de un siglo" : "unos " + (n >= 15 ? Math.round(n / 5) * 5 : Math.round(n)) + (Math.round(n) === 1 ? " año" : " años");
   var r = Math.round(rate * 100) / 100, rt = (r < 1 ? r.toFixed(2) : r.toFixed(1)) + " puntos por año";
   return t + " Al ritmo de " + y[0] + "–" + y[1] + " (" + (m.dir > 0 ? "+" : "−") + rt + "), se tardaría " + yrs + " en cerrar la brecha.*";
+}
+
+/* ---------- evolución en los tres censos: el ámbito elegido y el Perú ---------- */
+function sv(tag, a, txt){ var e = document.createElementNS("http://www.w3.org/2000/svg", tag); for (var k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; }
+function niceMax(x, pct){ if (!(x > 0)) return 1; var p = Math.pow(10, Math.floor(Math.log10(x))), f = [1, 2, 2.5, 5, 10].filter(function(f){ return f * p >= x; })[0] * p; return pct ? Math.min(f, 100) : f; }
+function fC(x){ return x >= 1e6 ? (Math.round(x / 1e5) / 10) + " mill." : x >= 1e4 ? Math.round(x / 1e3) + " mil" : nf.format(x); }
+function renderEvo(){
+  var m = M[S.ind], su = scopeUnit(), fig = $("evo"), svg = $("evo-svg"), pct = m.unit === "pct";
+  var ser = [{name: su.short, v: vals(su.lev, su.k, m.id), main: true}];
+  if (!(su.lev === "R" && su.k === 0)) ser.push({name: "Perú", v: vals("R", 0, m.id)});
+  var all = []; ser.forEach(function(s){ s.v.forEach(function(x){ if (x != null) all.push(x); }); });
+  fig.hidden = all.length < 2; if (fig.hidden) return;
+  clear(svg);
+  var W = Math.max(300, Math.min(640, fig.clientWidth || 640)), H = 220, L = pct ? 54 : 70, R = 28, T = 22, B = 28;
+  svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  var mx = niceMax(Math.max.apply(null, all), pct), fmt = pct ? fP : fC;
+  var X = function(y){ return L + (y - 2007) / 18 * (W - L - R); }, Y = function(v){ return T + (1 - v / mx) * (H - T - B); };
+  [0, .25, .5, .75, 1].forEach(function(f){
+    var v = f * mx, y = Y(v);
+    svg.appendChild(sv("line", {x1: L, x2: W - R, y1: y, y2: y, stroke: f ? "var(--rule2)" : "var(--line)", "stroke-width": 1}));
+    svg.appendChild(sv("text", {x: L - 8, y: y + 4, "text-anchor": "end", "font-size": 11, fill: "var(--muted)"}, pct ? (Math.round(v * 10) / 10) + "%" : fC(v)));
+  });
+  YRS.forEach(function(yr){ svg.appendChild(sv("text", {x: X(yr), y: H - 8, "text-anchor": "middle", "font-size": 12, "font-weight": 600, fill: "var(--ink2)"}, String(yr))); });
+  var cut = 0;
+  ser.slice().reverse().forEach(function(s){   // el Perú debajo, el ámbito encima
+    for (var j = 0; j < 2; j++) {
+      var a = s.v[j], b = s.v[j + 1]; if (a == null || b == null) continue;
+      if (!m.cmp[YRS[j] + "-" + YRS[j + 1]]) { cut++; continue; }
+      svg.appendChild(sv("line", {x1: X(YRS[j]), y1: Y(a), x2: X(YRS[j + 1]), y2: Y(b), stroke: s.main ? "var(--accent)" : "var(--muted)", "stroke-width": s.main ? 3 : 2, "stroke-dasharray": s.main ? "" : "5 4", "stroke-linecap": "round"}));
+    }
+    s.v.forEach(function(v, j){ if (v == null) return;
+      svg.appendChild(sv("circle", {cx: X(YRS[j]), cy: Y(v), r: s.main ? 4.5 : 3.5, fill: s.main ? "var(--accent)" : "var(--bg)", stroke: s.main ? "var(--bg)" : "var(--muted)", "stroke-width": 2}));
+    });
+  });
+  YRS.forEach(function(yr, j){   // cifras: la más alta arriba de su punto, la otra debajo
+    var pts = ser.map(function(s){ return {s: s, v: s.v[j]}; }).filter(function(p){ return p.v != null; }).sort(function(p, q){ return q.v - p.v; });
+    pts.forEach(function(p, i){
+      var below = i > 0 && pts.length > 1, y = Y(p.v) + (below ? 18 : -10);
+      svg.appendChild(sv("text", {x: X(yr), y: Math.min(Math.max(y, 11), H - B - 4), "text-anchor": j === 0 ? "start" : j === 2 ? "end" : "middle", "font-size": p.s.main ? 13 : 11, "font-weight": p.s.main ? 700 : 400, fill: p.s.main ? "var(--ink)" : "var(--muted)"}, fmt(p.v)));
+    });
+  });
+  svg.setAttribute("aria-label", ser.map(function(s){ return s.name + ": " + YRS.map(function(yr, j){ return yr + " " + (s.v[j] == null ? "sin dato" : fmt(s.v[j])); }).join(", "); }).join(". "));
+  var lg = $("evo-leg"); clear(lg);
+  ser.forEach(function(s){ lg.appendChild(el("span", {}, [el("i", {cls: s.main ? "" : "pe"}), s.name === "Perú" && s.main ? "Perú" : s.name])); });
+  var nt = $("evo-note"); nt.hidden = !cut; nt.textContent = cut ? "Sin línea entre censos cuya pregunta no se puede comparar; los valores sí se muestran." : "";
 }
 
 /* ---------- ranking ---------- */
@@ -899,11 +959,12 @@ function go(v){
   if (v === "ficha") renderFicha(); else if (v === "comparador") renderAll();
   window.scrollTo(0, 0);
 }
-function renderAll(){ renderControls(); renderSummary(); if (M[S.ind].cmp[S.pair]) { renderMap(); renderRanks(); renderFull(); } }
+function renderAll(){ renderControls(); renderSummary(); renderEvo(); if (M[S.ind].cmp[S.pair]) { renderMap(); renderRanks(); renderFull(); } }
 
 Promise.all([fetch("data/censos.json").then(function(r){ return r.json(); }), fetch("data/geo.json").then(function(r){ return r.json(); })]).then(function(res){
   D = res[0]; G = res[1];
   buildUnits(); setupControls(); initSel(); prepGeo(); setupMapEvents();
+  var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(renderEvo, 150); });   // el gráfico se dibuja al ancho real
   $("loading").hidden = true; go("comparador");
 }).catch(function(err){ $("loading").textContent = "No se pudieron cargar los datos. Recarga la página."; console.error(err); });
 })();
