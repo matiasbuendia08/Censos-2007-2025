@@ -371,6 +371,9 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <li>Solo indicadores que existen en al menos dos censos. Para cada par de censos se indica si la pregunta es la misma (=), parecida (≈) o distinta. Si no es comparable, el valor se muestra pero el cambio no se calcula.</li>
         <li>Los cambios de porcentajes están en puntos porcentuales (pp). Para población, hogares y viviendas se muestra el crecimiento en porcentaje y el cambio en número.</li>
         <li>Debajo de cada porcentaje aparece el número de viviendas, hogares o personas que cumple la condición. Un porcentaje puede bajar aunque el número suba, si el total creció más rápido.</li>
+        <li>"Mejoraron" y "empeoraron" dependen del indicador: en agua o internet mejorar es subir; en hacinamiento, analfabetismo o leña, bajar. En los indicadores sin una dirección deseable (población urbana, lengua materna, afiliación al SIS, entre otros) solo se dice si subieron o bajaron.</li>
+        <li>En los indicadores con una meta clara (llegar a 100% o a 0%) se indica cuántas viviendas, hogares o personas aún no la alcanzan y, si hay mejora, en cuántos años se cerraría la brecha al ritmo del periodo elegido: lo que falta ÷ (cambio en puntos ÷ años entre censos). Supone que el ritmo se mantiene; como el último tramo suele ser el más lento, es una estimación optimista.</li>
+        <li>En paredes, techos, pisos, agua, desagüe, documento de identidad y nivel educativo puedes elegir qué opciones cuentan, y en no asistencia escolar, qué edades. Por defecto se usa la definición recomendada.</li>
       </ul>
       <h2>Universos</h2>
       <ul>
@@ -378,14 +381,34 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <li>Viviendas: particulares con ocupantes presentes (6,400,131; 7,698,900 y 10,167,523).</li>
         <li>Hogares: 6,754,074; 8,252,284 y 10,570,171.</li>
       </ul>
+      <h2>Población</h2>
+      <ul>
+        <li>Población urbana: según la definición del censo, la que vive en centros poblados con 100 viviendas agrupadas o más, o en capitales de distrito.</li>
+        <li>Nacidos en otro país: en 2007 y 2017 el lugar de nacimiento se pregunta como el lugar donde vivía la madre cuando la persona nació; en 2025 se pregunta directamente si nació en otro país.</li>
+      </ul>
       <h2>Vivienda y servicios básicos</h2>
       <ul>
         <li>Definición recomendada de material adecuado, según las agrupaciones del INEI en el procesamiento del censo 2025: paredes de ladrillo o bloque de cemento, o de piedra o sillar con cal o cemento (en 2025 también drywall); techos de concreto armado; y pisos de parquet o madera pulida, láminas asfálticas o vinílicos, o losetas, terrazos o cerámicos.</li>
-        <li>En paredes, techos, pisos, agua y desagüe puedes elegir qué opciones cuentan. Las categorías se armonizaron entre censos: cuando una opción se juntaba con otra en 2007 (adobe y tapia; pozo ciego y letrina; manantial y río) se muestran juntas, y las que no existen en algún censo (drywall antes de 2025, vecino en 2025) llevan aviso.</li>
+        <li>En paredes, techos, pisos, agua y desagüe las categorías se armonizaron entre censos: cuando una opción se juntaba con otra en 2007 (adobe y tapia; pozo ciego y letrina; manantial y río) se muestran juntas, y las que no existen en algún censo (drywall antes de 2025, vecino en 2025) llevan aviso.</li>
         <li>El censo 2007 no preguntó el material del techo, así que los techos solo se comparan entre 2017 y 2025.</li>
+        <li>Hacinamiento: viviendas con más de 3.4 personas por habitación, sin contar baño, cocina ni pasadizos (umbral del INEI).</li>
         <li>Internet: 2007 y 2017 preguntaron si el hogar tenía conexión a internet; 2025 pregunta por internet fijo y por internet móvil por separado. Para comparar, en 2025 se cuenta el hogar que tiene uno u otro. Se compara con cautela (≈): parte del salto puede venir del cambio de pregunta.</li>
         <li>Agua y desagüe por red pública cuentan la conexión dentro de la vivienda o fuera de ella pero dentro de la edificación (2007 y 2017) o del lote (2025). No incluyen pilón de uso público, camión cisterna, pozo, río ni vecino. La pregunta es la misma en los tres censos; en 2025 el agua se pregunta en dos pasos.</li>
         <li>Electricidad: 2007 y 2017 preguntaron si la vivienda tenía alumbrado eléctrico por red pública; 2025 pregunta de dónde proviene principalmente la energía eléctrica. Por eso la luz y los tres servicios juntos se comparan con 2025 con cautela (≈).</li>
+      </ul>
+      <h2>Hogar</h2>
+      <ul>
+        <li>Energía para cocinar: en 2007 se preguntó solo por la energía principal; desde 2017, por todas las que usa el hogar. Por eso leña, gas y combustibles contaminantes no se comparan con 2007. Combustibles contaminantes son los hogares que cocinan solo con leña, carbón, bosta u otro combustible de ese tipo, sin gas ni electricidad.</li>
+        <li>Computadora, laptop o tablet: en 2007 solo se preguntó por computadora, así que no se compara con 2007. Auto o camioneta y motocicleta no se preguntaron en 2007.</li>
+      </ul>
+      <h2>Salud e identidad</h2>
+      <ul>
+        <li>Sin ningún documento de identidad: personas que no tienen DNI ni otro documento (partida de nacimiento, carné de extranjería o permiso temporal). No cuenta a los extranjeros, que no pueden tener DNI, ni a quienes respondieron que no recuerdan o no saben qué documento tienen (2.7 millones en 2025), una respuesta ambigua que se puede sumar con las casillas.</li>
+        <li>En 2007 solo se preguntó por el DNI a los mayores de 18 años, sin preguntar por otros documentos, así que este indicador se compara solo entre 2017 y 2025.</li>
+      </ul>
+      <h2>Lengua materna</h2>
+      <ul>
+        <li>En 2025 se puede declarar más de una lengua materna; en 2007 y 2017, una sola. El quechua sí se compara, pero puede estar algo inflado en 2025. El castellano no se compara con 2025: sube sobre todo por las respuestas múltiples (quechua y castellano a la vez), no por un cambio real.</li>
       </ul>
       <h2>Educación</h2>
       <ul>
@@ -403,8 +426,9 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
       </ul>
       <h2>Lo que no se compara</h2>
       <ul>
-        <li>Discapacidad, autoidentificación étnica y tenencia de la vivienda: las preguntas cambiaron entre censos.</li>
-        <li>Castellano como lengua materna frente a 2025: en 2025 se puede declarar más de una lengua materna.</li>
+        <li>Discapacidad, autoidentificación étnica y tenencia de la vivienda: las preguntas cambiaron entre censos, así que no se incluyen.</li>
+        <li>Empleo: el censo 2025 no preguntó por empleo. Para cifras actuales de empleo está la encuesta de empleo del INEI (EPEN).</li>
+        <li>Dentro de la página, el cambio no se calcula en: techos, computadora, energía para cocinar, documento de identidad, auto y moto frente a 2007; y castellano como lengua materna frente a 2025. Los valores de cada censo sí se muestran.</li>
       </ul>
       <h2>Mapa</h2>
       <p>El mapa usa los límites distritales censales del INEI con la división de 2017 (1,874 distritos; versión simplificada publicada en josedaniel-cb/limites-peru-geojson, licencia MIT). Las provincias y las regiones se arman uniendo esos distritos, así que Putumayo y sus cuatro distritos tienen polígono propio. Los 19 distritos creados entre 2017 y 2025 no lo tienen: su territorio se ve dentro del distrito del que salieron. Es una aproximación visual; las cifras de las tablas usan siempre los territorios de 2025.</p>
