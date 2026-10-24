@@ -18,6 +18,7 @@
   --accent:#1F3A5F; --accent-ink:#ffffff; --down:#8C2D1F;
   --warn-bg:#FBF5E6; --warn-bd:#B8892B; --warn-ink:#7A5A12;
   --m-n2:#8C2D1F; --m-n1:#D9A08F; --m-p1:#B7C7DB; --m-p2:#5C7FA8; --m-p3:#1F3A5F; --m-na:#E4E6EA; --m-stroke:#ffffff; --m-dep:#1B1F24;
+  --c1:#1F3A5F; --c2:#4F78A8; --c3:#9DB8D8; --c4:#B8892B; --c5:#7A5A12; --c6:#8C2D1F; --c7:#D59A88; --c8:#5E7A3A; --c9:#9AA3AE;
   --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
   --sans:"Public Sans", "Helvetica Neue", Arial, sans-serif;
 }
@@ -27,6 +28,7 @@
   --accent:#8FB3DE; --accent-ink:#0E1520; --down:#E0907E;
   --warn-bg:#2A2416; --warn-bd:#C9A24B; --warn-ink:#E3C27A;
   --m-n2:#C0573F; --m-n1:#8A5A4E; --m-p1:#3E5570; --m-p2:#5E86B5; --m-p3:#A9C6EA; --m-na:#2A313A; --m-stroke:#12161B; --m-dep:#E7EAEE;
+  --c1:#A9C6EA; --c2:#5E86B5; --c3:#34506F; --c4:#E3C27A; --c5:#A8842F; --c6:#E0907E; --c7:#8A4E42; --c8:#A3B56B; --c9:#6B7480;
   color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#12161B; --panel:#1A2028; --ink:#E7EAEE; --ink2:#C5CBD3; --muted:#98A2AE;
@@ -34,6 +36,7 @@
   --accent:#8FB3DE; --accent-ink:#0E1520; --down:#E0907E;
   --warn-bg:#2A2416; --warn-bd:#C9A24B; --warn-ink:#E3C27A;
   --m-n2:#C0573F; --m-n1:#8A5A4E; --m-p1:#3E5570; --m-p2:#5E86B5; --m-p3:#A9C6EA; --m-na:#2A313A; --m-stroke:#12161B; --m-dep:#E7EAEE;
+  --c1:#A9C6EA; --c2:#5E86B5; --c3:#34506F; --c4:#E3C27A; --c5:#A8842F; --c6:#E0907E; --c7:#8A4E42; --c8:#A3B56B; --c9:#6B7480;
   color-scheme:dark }
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
 a{color:var(--accent)} a:hover{text-decoration-thickness:2px}
@@ -123,6 +126,17 @@ select,input[type=search]{border:1px solid var(--line);background:var(--bg);padd
 .evo-leg span{display:flex;align-items:center;gap:6px}
 .evo-leg i{display:inline-block;width:20px;border-top:3px solid var(--accent)}
 .evo-leg i.pe{border-top:2px dashed var(--muted)}
+.gsec{padding-block:24px 8px;display:flex;flex-direction:column;gap:44px}
+.gfig{margin:0;display:flex;flex-direction:column;gap:12px;max-width:900px;min-width:0}
+.ghead{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--ink);padding-bottom:10px}
+.gtools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.gtools select{max-width:220px}
+.gfig svg{display:block;overflow:visible;font-family:var(--sans)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);padding:3px 2px 3px 9px;font-size:13px;background:var(--bg)}
+.chip i{width:12px;height:3px;display:inline-block}
+.chip button{border:0;background:none;color:var(--muted);font-size:17px;line-height:1;padding:0 6px}
+.btn.sm{padding:6px 12px;font-size:13px}
 .credit{display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none}
 .credit:hover{color:var(--ink)}
 .credit svg{flex:none;border-radius:3px}
@@ -271,6 +285,7 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
     <div class="navbox">
     <nav class="nav" aria-label="Secciones">
       <button data-view="comparador" aria-current="page">Comparador</button>
+      <button data-view="graficos">Gráficos</button>
       <button data-view="ficha">Ficha por territorio</button>
       <button data-view="metodo">Metodología</button>
     </nav>
@@ -288,8 +303,8 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
   var root = document.documentElement, btn = document.getElementById("theme"), mq = window.matchMedia("(prefers-color-scheme: dark)");
   function dark(){ var t = root.getAttribute("data-theme"); return t ? t === "dark" : mq.matches; }
   function label(){ var d = dark(); btn.querySelector(".tx").textContent = d ? "Modo claro" : "Modo oscuro"; btn.setAttribute("aria-label", d ? "Cambiar a modo claro" : "Cambiar a modo oscuro"); }
-  btn.addEventListener("click", function(){ var t = dark() ? "light" : "dark"; root.setAttribute("data-theme", t); try{ localStorage.setItem("tema", t); }catch(e){} label(); });
-  if (mq.addEventListener) mq.addEventListener("change", label);
+  btn.addEventListener("click", function(){ var t = dark() ? "light" : "dark"; root.setAttribute("data-theme", t); try{ localStorage.setItem("tema", t); }catch(e){} label(); document.dispatchEvent(new Event("tema")); });
+  if (mq.addEventListener) mq.addEventListener("change", function(){ label(); document.dispatchEvent(new Event("tema")); });
   label();
 })();
 </script>
@@ -354,6 +369,40 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
     </section>
     <section class="wrap" id="fn-gap" hidden>
       <p class="muted small" style="max-width:80ch;border-top:1px solid var(--rule);padding-top:12px;margin-top:8px">* Ritmo = cambio en puntos porcentuales entre los dos censos ÷ años entre ellos. Años para cerrar la brecha = lo que falta para llegar a 100% (o a 0% si el indicador debe bajar) ÷ ritmo. Por ejemplo, si un indicador pasó de 28.0% a 67.8% en 8 años, avanzó 5.0 puntos por año; le faltan 32.2 puntos, así que tardaría unos 6 años. Supone que el ritmo se mantiene igual; como el último tramo suele ser el más lento, es una estimación optimista.</p>
+    </section>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div id="v-graficos" hidden>
+    <section class="wrap intro">
+      <h1>Gráficos</h1>
+      <p>Elige un indicador: las 25 regiones, su evolución en los tres censos y, en los indicadores con categorías, la distribución completa. Cada gráfico se puede descargar como imagen.</p>
+    </section>
+    <section class="wrap controls" aria-label="Indicador">
+      <div class="row">
+        <div class="field grow"><label class="lab" for="g-cat">Tema</label><select id="g-cat"></select></div>
+        <div class="field grow"><label class="lab" for="g-ind">Indicador</label><select id="g-ind"></select></div>
+      </div>
+      <p class="muted small" id="g-unit" style="margin:0"></p>
+    </section>
+    <section class="wrap gsec">
+      <figure class="gfig" id="g-bars">
+        <div class="ghead"><div><div class="h3 gt" id="g-bars-t"></div><div class="muted small gs" id="g-bars-s"></div></div>
+          <div class="gtools"><div class="seg" role="group" aria-label="Año" id="g-year"></div><button class="btn sm" data-save="g-bars">Descargar imagen</button></div></div>
+        <svg role="img"></svg>
+      </figure>
+      <figure class="gfig" id="g-evo">
+        <div class="ghead"><div><div class="h3 gt" id="g-evo-t"></div><div class="muted small gs" id="g-evo-s"></div></div>
+          <div class="gtools"><label class="sr" for="g-add">Agregar región</label><select id="g-add"></select><button class="btn sm" data-save="g-evo">Descargar imagen</button></div></div>
+        <div class="chips" id="g-chips"></div>
+        <svg role="img"></svg>
+        <p class="muted small" id="g-evo-n" hidden></p>
+      </figure>
+      <figure class="gfig" id="g-dist" hidden>
+        <div class="ghead"><div><div class="h3 gt" id="g-dist-t"></div><div class="muted small gs" id="g-dist-s"></div></div>
+          <div class="gtools"><label class="sr" for="g-dreg">Territorio</label><select id="g-dreg"></select><button class="btn sm" data-save="g-dist">Descargar imagen</button></div></div>
+        <svg role="img"></svg>
+      </figure>
     </section>
   </div>
 
@@ -444,6 +493,10 @@ footer .wrap{padding-block:18px 36px;display:flex;flex-wrap:wrap;justify-content
         <li>Discapacidad, autoidentificación étnica y tenencia de la vivienda: las preguntas cambiaron entre censos, así que no se incluyen.</li>
         <li>Empleo: el censo 2025 no preguntó por empleo. Para cifras actuales de empleo está la encuesta de empleo del INEI (EPEN).</li>
         <li>Dentro de la página, el cambio no se calcula en: techos, computadora, energía para cocinar, documento de identidad, auto y moto frente a 2007; y castellano como lengua materna frente a 2025. Los valores de cada censo sí se muestran.</li>
+      </ul>
+      <h2>Gráficos</h2>
+      <ul>
+        <li>Las barras muestran el valor de cada región en el año elegido; la evolución une los tres censos solo cuando la pregunta se puede comparar; la distribución muestra todas las categorías del indicador, armonizadas como en las casillas. Las imágenes descargadas llevan la fuente.</li>
       </ul>
       <h2>Mapa</h2>
       <p>El mapa usa los límites distritales censales del INEI con la división de 2017 (1,874 distritos; versión simplificada publicada en josedaniel-cb/limites-peru-geojson, licencia MIT). Las provincias y las regiones se arman uniendo esos distritos, así que Putumayo y sus cuatro distritos tienen polígono propio. Los 19 distritos creados entre 2017 y 2025 no lo tienen: su territorio se ve dentro del distrito del que salieron. Es una aproximación visual; las cifras de las tablas usan siempre los territorios de 2025.</p>
@@ -706,6 +759,161 @@ function renderEvo(){
   var nt = $("evo-note"); nt.hidden = !cut; nt.textContent = cut ? "Sin línea entre censos cuya pregunta no se puede comparar; los valores sí se muestran." : "";
 }
 
+/* ---------- pestaña Gráficos: regiones, evolución y distribución ---------- */
+var GS = {ind: null, year: null, regs: null, dreg: 0}, PAL = ["--c1", "--c2", "--c4", "--c6", "--c8", "--c5", "--c3", "--c7", "--c9"];
+function cvar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function darkTxt(v){ var h = cvar(v).replace("#", ""); if (h.length !== 6) return false; var n = parseInt(h, 16); return (0.299 * (n >> 16) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255 > 0.55; }
+function gW(id, mx){ var f = $(id), w = f.clientWidth || (f.parentNode && f.parentNode.clientWidth) || 640; return Math.max(300, Math.min(mx || 900, w)); }
+function sizeSvg(svg, W, H){ svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", "0 0 " + W + " " + H); }
+function lastYear(m){ for (var j = 2; j >= 0; j--) if (vals("R", 0, m.id)[j] != null) return j; return 2; }
+function renderGraf(){
+  var m = M[S.ind];
+  $("g-cat").value = S.cat;
+  var s = $("g-ind"); clear(s); BYCAT[S.cat].forEach(function(x){ var o = el("option", {value: x.id, text: x.label}); if (x.id === S.ind) o.selected = true; s.appendChild(o); });
+  $("g-unit").textContent = m.def_ + ".";
+  if (GS.ind !== m.id) {   // al cambiar de indicador: último año con dato y, como ejemplo, la región más alta y la más baja
+    GS.ind = m.id; GS.year = lastYear(m);
+    var r = D.R.names.map(function(_, k){ return {k: k, v: vals("R", k, m.id)[GS.year]}; }).filter(function(x){ return x.k > 0 && x.v != null; }).sort(function(a, b){ return b.v - a.v; });
+    GS.regs = r.length ? [r[0].k, r[r.length - 1].k] : [];
+  }
+  renderGBars(); renderGEvo(); renderGDist();
+}
+function renderGBars(){
+  var m = M[S.ind], fig = $("g-bars"), svg = fig.querySelector("svg"), pct = m.unit === "pct", fmt = pct ? fP : fN;
+  segButtons($("g-year"), YRS.map(function(y, j){ return {v: j, t: String(y), dis: vals("R", 0, m.id)[j] == null ? "Sin dato en " + y : ""}; }), GS.year, function(v){ GS.year = v; renderGBars(); });
+  var yr = YRS[GS.year];
+  $("g-bars-t").textContent = m.label + ": las 25 regiones en " + yr;
+  $("g-bars-s").textContent = (pct ? "Porcentaje de " + m.den : "Número de " + m.cu) + ". Ordenadas de mayor a menor; el Perú, resaltado.";
+  var rows = D.R.names.map(function(n, k){ return {n: k ? rname(n) : "Perú", k: k, v: vals("R", k, m.id)[GS.year]}; });
+  rows.sort(function(a, b){ return (b.v == null ? -1 : b.v) - (a.v == null ? -1 : a.v); });
+  clear(svg);
+  var W = gW("g-bars"), rh = 22, LW = Math.min(196, Math.round(W * 0.42)), RW = pct ? 52 : 86, H = rows.length * rh + 4;
+  sizeSvg(svg, W, H);
+  var mx = Math.max.apply(null, rows.map(function(r){ return r.v || 0; })) || 1, bw = W - LW - RW, mc = Math.floor((LW - 10) / 6.8);
+  rows.forEach(function(r){ if (r.n.length > mc) r.n = r.k && D.R.names[r.k] === "Lima*" ? "Lima Met. y Callao" : r.n.slice(0, mc - 1) + "…"; });   // en pantallas angostas
+  rows.forEach(function(r, i){
+    var y = i * rh, pe = r.k === 0;
+    if (pe) svg.appendChild(sv("rect", {x: 0, y: y, width: W, height: rh, fill: "var(--panel)"}));
+    svg.appendChild(sv("text", {x: LW - 10, y: y + 15, "text-anchor": "end", "font-size": 12.5, "font-weight": pe ? 700 : 400, fill: "var(--ink)"}, r.n));
+    if (r.v == null) { svg.appendChild(sv("text", {x: LW, y: y + 15, "font-size": 12, fill: "var(--muted)"}, "sin dato")); return; }
+    var w = Math.max(1, r.v / mx * bw);
+    svg.appendChild(sv("rect", {x: LW, y: y + 4, width: w, height: rh - 8, fill: pe ? "var(--accent)" : "var(--m-p2)"}));
+    svg.appendChild(sv("text", {x: LW + w + 6, y: y + 15, "font-size": 12, "font-weight": pe ? 700 : 400, fill: "var(--ink2)"}, fmt(r.v)));
+  });
+  svg.setAttribute("aria-label", rows.map(function(r){ return r.n + " " + (r.v == null ? "sin dato" : fmt(r.v)); }).join(", "));
+}
+function renderGEvo(){
+  var m = M[S.ind], fig = $("g-evo"), svg = fig.querySelector("svg"), pct = m.unit === "pct", fmt = pct ? fP : fC;
+  $("g-evo-t").textContent = m.label + ": evolución 2007–2017–2025";
+  $("g-evo-s").textContent = "El Perú y las regiones que elijas (hasta seis). " + (pct ? "Porcentaje de " + m.den + "." : "Número de " + m.cu + ".");
+  var add = $("g-add"); clear(add); add.appendChild(el("option", {value: "", text: GS.regs.length >= 6 ? "Máximo seis regiones" : "Agregar región…"}));
+  D.R.names.forEach(function(n, k){ if (k && GS.regs.indexOf(k) < 0) add.appendChild(el("option", {value: k, text: rname(n)})); });
+  add.disabled = GS.regs.length >= 6;
+  var ch = $("g-chips"); clear(ch);
+  GS.regs.forEach(function(k, i){ ch.appendChild(el("span", {cls: "chip"}, [el("i", {style: "background:var(" + PAL[i] + ")"}), rname(D.R.names[k]), el("button", {"aria-label": "Quitar " + rname(D.R.names[k]), text: "×", onclick: function(){ GS.regs.splice(GS.regs.indexOf(k), 1); renderGEvo(); }})])); });
+  var ser = [{name: "Perú", v: vals("R", 0, m.id), col: "var(--muted)", pe: true}].concat(GS.regs.map(function(k, i){ return {name: rname(D.R.names[k]), v: vals("R", k, m.id), col: "var(" + PAL[i] + ")"}; }));
+  var all = []; ser.forEach(function(s){ s.v.forEach(function(x){ if (x != null) all.push(x); }); });
+  clear(svg);
+  var W = gW("g-evo"), L = pct ? 54 : 70, R = 20, T = 14, PB = 30;
+  // leyenda dentro del gráfico, para que salga en la imagen descargada
+  var items = ser.map(function(s){ return {s: s, w: 30 + s.name.length * 7}; }), rowsL = [[]], acc = 0;
+  items.forEach(function(it){ if (acc + it.w > W - L && rowsL[rowsL.length - 1].length) { rowsL.push([]); acc = 0; } rowsL[rowsL.length - 1].push(it); acc += it.w + 14; });
+  var PH = 260, H = T + PH + PB + rowsL.length * 20;
+  sizeSvg(svg, W, H);
+  var mx = niceMax(Math.max.apply(null, all.length ? all : [1]), pct);
+  var X = function(y){ return L + (y - 2007) / 18 * (W - L - R); }, Y = function(v){ return T + (1 - v / mx) * PH; };
+  [0, .25, .5, .75, 1].forEach(function(f){ var v = f * mx, y = Y(v);
+    svg.appendChild(sv("line", {x1: L, x2: W - R, y1: y, y2: y, stroke: f ? "var(--rule2)" : "var(--line)"}));
+    svg.appendChild(sv("text", {x: L - 8, y: y + 4, "text-anchor": "end", "font-size": 11, fill: "var(--muted)"}, pct ? (Math.round(v * 10) / 10) + "%" : fC(v))); });
+  YRS.forEach(function(yr){ svg.appendChild(sv("text", {x: X(yr), y: T + PH + 20, "text-anchor": "middle", "font-size": 12, "font-weight": 600, fill: "var(--ink2)"}, String(yr))); });
+  var cut = 0;
+  ser.forEach(function(s){
+    for (var j = 0; j < 2; j++) { var a = s.v[j], b = s.v[j + 1]; if (a == null || b == null) continue;
+      if (!m.cmp[YRS[j] + "-" + YRS[j + 1]]) { if (s.pe) cut++; continue; }
+      svg.appendChild(sv("line", {x1: X(YRS[j]), y1: Y(a), x2: X(YRS[j + 1]), y2: Y(b), stroke: s.col, "stroke-width": s.pe ? 2 : 3, "stroke-dasharray": s.pe ? "5 4" : "", "stroke-linecap": "round"})); }
+    s.v.forEach(function(v, j){ if (v == null) return;
+      var c = sv("circle", {cx: X(YRS[j]), cy: Y(v), r: s.pe ? 3.5 : 4.5, fill: s.pe ? "var(--bg)" : s.col, stroke: s.pe ? s.col : "var(--bg)", "stroke-width": 2});
+      c.appendChild(sv("title", {}, s.name + ", " + YRS[j] + ": " + fmt(v))); svg.appendChild(c); });
+  });
+  rowsL.forEach(function(row, ri){ var x = L, y = T + PH + PB + 8 + ri * 20;
+    row.forEach(function(it){ svg.appendChild(sv("line", {x1: x, x2: x + 20, y1: y, y2: y, stroke: it.s.col, "stroke-width": it.s.pe ? 2 : 3, "stroke-dasharray": it.s.pe ? "5 4" : ""}));
+      svg.appendChild(sv("text", {x: x + 26, y: y + 4, "font-size": 12, fill: "var(--ink2)"}, it.s.name)); x += it.w + 14; }); });
+  svg.setAttribute("aria-label", ser.map(function(s){ return s.name + ": " + YRS.map(function(yr, j){ return yr + " " + (s.v[j] == null ? "sin dato" : fmt(s.v[j])); }).join(", "); }).join(". "));
+  var n = $("g-evo-n"); n.hidden = !cut; n.textContent = "Sin línea entre censos cuya pregunta no se puede comparar; pasa el cursor por los puntos para ver los valores.";
+}
+function renderGDist(){
+  var m = M[S.ind], K = D.K && D.K[m.id], fig = $("g-dist");
+  fig.hidden = !K || !!K.byage; if (fig.hidden) return;
+  var svg = fig.querySelector("svg"), dn = FAMNAME[m.id] ? FAMNAME[m.id][0] : m.label;
+  var sel = $("g-dreg"); clear(sel); D.R.names.forEach(function(n, k){ var o = el("option", {value: k, text: k ? rname(n) : "Perú"}); if (k === GS.dreg) o.selected = true; sel.appendChild(o); });
+  var k = GS.dreg, name = k ? rname(D.R.names[k]) : "Perú", den = BASE[m.id] ? BASE[m.id].R[2][k] : D.R.v[K.den][k];
+  $("g-dist-t").textContent = dn + ": distribución completa, " + name;
+  $("g-dist-s").textContent = "Porcentaje de " + (BASE[m.id] ? BASE[m.id].den : m.den) + " en cada censo, con todas las categorías. Pasa el cursor por las barras para ver los valores.";
+  var cats = K.cats;
+  var yrs = YRS.map(function(yr, j){
+    var t = den[j], segs = cats.map(function(c){ return {c: c, n: K.R[c.id][k][j]}; });
+    if (!t || segs.every(function(s){ return s.n == null; })) return {yr: yr, none: true};
+    var sum = 0; segs.forEach(function(s){ s.n = s.n || 0; sum += s.n; });
+    if ((t - sum) / t > 0.005) segs.push({c: {id: "_x", label: "Sin especificar"}, n: t - sum});
+    return {yr: yr, t: t, segs: segs};
+  });
+  clear(svg);
+  var W = gW("g-dist"), LW = 46, bh = 34, gap = 14, T = 4;
+  var legend = cats.map(function(c, i){ return {label: c.label + (K.def.indexOf(c.id) >= 0 ? " (recomendada)" : ""), col: "var(" + PAL[i % PAL.length] + ")", id: c.id}; });
+  if (yrs.some(function(y){ return y.segs && y.segs.some(function(s){ return s.c.id === "_x"; }); })) legend.push({label: "Sin especificar", col: "var(--m-na)", id: "_x"});
+  var colOf = {}; legend.forEach(function(l){ colOf[l.id] = l.col; });
+  var maxCh = Math.floor((W - 30) / 6.6), LH = 19, H = T + YRS.length * (bh + gap) + 10 + legend.length * LH;
+  sizeSvg(svg, W, H);
+  yrs.forEach(function(y, i){
+    var yy = T + i * (bh + gap), x = LW, bw = W - LW;
+    svg.appendChild(sv("text", {x: 0, y: yy + bh / 2 + 5, "font-size": 13, "font-weight": 700, fill: "var(--ink2)"}, String(y.yr)));
+    if (y.none) { svg.appendChild(sv("rect", {x: LW, y: yy, width: bw, height: bh, fill: "var(--m-na)"})); svg.appendChild(sv("text", {x: LW + 10, y: yy + bh / 2 + 5, "font-size": 12, fill: "var(--muted)"}, "Sin dato en " + y.yr + " (ver la nota de comparabilidad)")); return; }
+    y.segs.forEach(function(s){ var p = s.n / y.t, w = p * bw; if (w <= 0) return;
+      var col = colOf[s.c.id], r = sv("rect", {x: x, y: yy, width: w, height: bh, fill: col, stroke: "var(--bg)", "stroke-width": 1});
+      r.appendChild(sv("title", {}, s.c.label + ", " + y.yr + ": " + fP(100 * p) + " (" + fN(s.n) + ")")); svg.appendChild(r);
+      if (w > 38) svg.appendChild(sv("text", {x: x + w / 2, y: yy + bh / 2 + 4, "text-anchor": "middle", "font-size": 11.5, "font-weight": 600, fill: darkTxt(col.slice(4, -1)) ? "#1B1F24" : "#ffffff"}, (100 * p).toFixed(p < 0.1 ? 1 : 0) + "%"));
+      x += w; });
+  });
+  legend.forEach(function(l, i){ var y = T + YRS.length * (bh + gap) + 10 + i * LH, t = l.label.length > maxCh ? l.label.slice(0, maxCh - 1) + "…" : l.label;
+    svg.appendChild(sv("rect", {x: 0, y: y, width: 12, height: 12, fill: l.col}));
+    var tx = sv("text", {x: 20, y: y + 10.5, "font-size": 12.5, fill: "var(--ink2)"}, t); tx.appendChild(sv("title", {}, l.label)); svg.appendChild(tx); });
+  svg.setAttribute("aria-label", yrs.map(function(y){ return y.none ? y.yr + ": sin dato" : y.yr + ": " + y.segs.map(function(s){ return s.c.label + " " + fP(100 * s.n / y.t); }).join(", "); }).join(". "));
+}
+/* descarga en PNG: resuelve los colores del tema actual y agrega título y fuente */
+function savePNG(id){
+  var fig = $(id), svg = fig.querySelector("svg"), W = +svg.getAttribute("width"), H = +svg.getAttribute("height");
+  var res = function(s){ return s.replace(/var\((--[\w-]+)\)/g, function(_, v){ return cvar(v) || "#000"; }); };
+  var title = fig.querySelector(".gt").textContent, sub = fig.querySelector(".gs").textContent;
+  var pad = 24, top = 66, bot = 54, TW = W + 2 * pad, TH = H + top + bot;
+  var out = sv("svg", {xmlns: "http://www.w3.org/2000/svg", width: TW, height: TH, viewBox: "0 0 " + TW + " " + TH, "font-family": "Arial, Helvetica, sans-serif"});
+  out.appendChild(sv("rect", {width: TW, height: TH, fill: res("var(--bg)")}));
+  out.appendChild(sv("text", {x: pad, y: 32, "font-size": 19, "font-weight": 700, fill: res("var(--ink)")}, title));
+  out.appendChild(sv("text", {x: pad, y: 52, "font-size": 12, fill: res("var(--muted)")}, sub.length > TW / 6.2 ? sub.slice(0, Math.floor(TW / 6.2) - 1) + "…" : sub));
+  var g = sv("g", {transform: "translate(" + pad + "," + top + ")"}), c = svg.cloneNode(true);
+  c.querySelectorAll("*").forEach(function(e){ Array.prototype.slice.call(e.attributes).forEach(function(a){ if (a.value.indexOf("var(") >= 0) e.setAttribute(a.name, res(a.value)); }); });
+  c.querySelectorAll("title").forEach(function(t){ t.parentNode.removeChild(t); });
+  while (c.firstChild) g.appendChild(c.firstChild); out.appendChild(g);
+  out.appendChild(sv("text", {x: pad, y: TH - 30, "font-size": 11, fill: res("var(--muted)")}, "Fuente: INEI – Censos Nacionales 2007, 2017 y 2025."));
+  out.appendChild(sv("text", {x: pad, y: TH - 14, "font-size": 11, fill: res("var(--muted)")}, "Perú en tres censos · Elaborado por Matias Buendia"));
+  var img = new Image(), url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(out));
+  img.onload = function(){
+    var cv = document.createElement("canvas"), sc = 2; cv.width = TW * sc; cv.height = TH * sc;
+    var cx = cv.getContext("2d"); cx.scale(sc, sc); cx.drawImage(img, 0, 0);
+    cv.toBlob(function(b){ var a = document.createElement("a"); a.href = URL.createObjectURL(b);
+      a.download = (title.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70) || "grafico") + ".png";
+      document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000); }, "image/png");
+  };
+  img.src = url;
+}
+function setupGraf(){
+  var c = $("g-cat"); D.cats.forEach(function(k){ c.appendChild(el("option", {value: k, text: k})); });
+  c.addEventListener("change", function(e){ S.cat = e.target.value; S.ind = BYCAT[S.cat][0].id; fixPair(); renderGraf(); });
+  $("g-ind").addEventListener("change", function(e){ S.ind = e.target.value; fixPair(); renderGraf(); });
+  $("g-add").addEventListener("change", function(e){ var k = +e.target.value; if (k && GS.regs.length < 6) GS.regs.push(k); renderGEvo(); });
+  $("g-dreg").addEventListener("change", function(e){ GS.dreg = +e.target.value; renderGDist(); });
+  document.querySelectorAll("[data-save]").forEach(function(b){ b.addEventListener("click", function(){ savePNG(b.getAttribute("data-save")); }); });
+}
+
 /* ---------- ranking ---------- */
 function rankData(){
   var m = M[S.ind], all = scopeUnits(), ok = [], out = 0;
@@ -954,9 +1162,9 @@ function setupSearch(inp, res){
 /* ---------- vistas ---------- */
 function go(v){
   S.view = v;
-  ["comparador", "ficha", "metodo"].forEach(function(n){ $("v-" + n).hidden = n !== v; });
+  ["comparador", "graficos", "ficha", "metodo"].forEach(function(n){ $("v-" + n).hidden = n !== v; });
   document.querySelectorAll(".nav button").forEach(function(b){ if (b.getAttribute("data-view") === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-  if (v === "ficha") renderFicha(); else if (v === "comparador") renderAll();
+  if (v === "ficha") renderFicha(); else if (v === "comparador") renderAll(); else if (v === "graficos") renderGraf();
   window.scrollTo(0, 0);
 }
 function renderAll(){ renderControls(); renderSummary(); renderEvo(); if (M[S.ind].cmp[S.pair]) { renderMap(); renderRanks(); renderFull(); } }
@@ -964,7 +1172,10 @@ function renderAll(){ renderControls(); renderSummary(); renderEvo(); if (M[S.in
 Promise.all([fetch("data/censos.json").then(function(r){ return r.json(); }), fetch("data/geo.json").then(function(r){ return r.json(); })]).then(function(res){
   D = res[0]; G = res[1];
   buildUnits(); setupControls(); initSel(); prepGeo(); setupMapEvents();
-  var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(renderEvo, 150); });   // el gráfico se dibuja al ancho real
+  setupGraf();
+  var redraw = function(){ if (S.view === "graficos") renderGraf(); else if (S.view === "comparador") renderEvo(); };
+  var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(redraw, 150); });   // los gráficos se dibujan al ancho real
+  document.addEventListener("tema", redraw);
   $("loading").hidden = true; go("comparador");
 }).catch(function(err){ $("loading").textContent = "No se pudieron cargar los datos. Recarga la página."; console.error(err); });
 })();
